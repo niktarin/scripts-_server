@@ -1,0 +1,8 @@
+#добавление в лог
+log_append -u user_name(console,342) -t text
+# вывести в консоль
+print_log -u [322,232,console]
+
+save_to_file -u [322,232,console] -w{a} -f file_path
+
+
