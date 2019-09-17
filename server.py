@@ -4,8 +4,15 @@ from console_tr import consol_tr
 from log import log
 from ml_control import ml_control
 
-main_fun = {"ml_control":ml_control()}
 
+
+
+# main_fun = {"ml_control":ml_control(),
+#             "log":log(),
+#             "consol_tr":consol_tr(),
+#             "main_tr": main_tr(),
+#             }
+# l
 
 ftp_ip = "153.156.155.120"
 class Main_tread(Thread):
