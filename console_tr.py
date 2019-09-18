@@ -8,12 +8,10 @@ class consol_tr(Thread):
                 "log_append": "Добавить комментарий в лог",
                 "save_to_file": "Запись лога в файл"}
 
-    flags = ["-u", "-w", "-a", "-f"]
-
-    def __init__(self, main_tr, log):
+    def __init__(self, main_hab):
         Thread.__init__(self)
-        self.log = log
-        self.main_tr = main_tr
+        self.main_hab = main_hab
+
 
     def check_command(self, command):
         regex = re.compile(r"\b(\w+)\s*:\s*([^:]*)(?=\s+\w+\s*:|$)")
@@ -21,16 +19,11 @@ class consol_tr(Thread):
         for i in commands:
             commands[i] = commands[i].replace(" ","")
 
-
         if "command" not in commands:
             print("Команда не опознана")
             return
 
         elif  commands["command"] not in self.commands:
-
-            print(commands["command"])
-            print(self.commands[commands["command"]])
-
             print("Команда не йдена")
             return
 
@@ -41,15 +34,15 @@ class consol_tr(Thread):
             return
 
         if type_command == "print_log":
-            self.log.print_log(commands)
+            self.main_hab.log.print_log(commands)
             print("Комманда принята")
 
         elif type_command == "log_append":
-            self.log.log_append(commands)
+            self.main_hab.log.log_append(commands)
             print("Комманда принята")
 
         elif type_command == "save_to_file":
-            self.log.save_to_file(commands)
+            self.main_hab.log.save_to_file(commands)
             print("Комманда принята")
 
     def run(self):
