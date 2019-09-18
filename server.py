@@ -2,7 +2,7 @@ from threading import Thread
 import time
 from console_tr import consol_tr
 from log import log
-ак
+
 from ml_control import ml_control
 from data_exchange import data_exchange_tr
 
@@ -14,6 +14,7 @@ class main_hab():
 
     def __init__(self):
         self.log = log(ftp_ip)
+
 
 main_hab = main_hab()
 consol_tr = consol_tr(main_hab)
