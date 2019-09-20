@@ -10,7 +10,8 @@ from scripts.registr_fb import Registr_fb_tr
 from scripts.load_img import load_img_tr
 
 
-class driver_obj:
+class main_obj:
+
     def __init__(self):
         self.settings = None
         self.driver = None
@@ -25,7 +26,7 @@ class driver_obj:
         self.scenario_sattus = None
         self.ml_answear = None
         self.tr_answear = None
-
+        self.log = None
         self.answer = {"id_scenarios": self.id_scenarios,
                        "type_scenario": self.type_scenario,
                        "output_data": {},
@@ -69,7 +70,6 @@ class driver_obj:
         self.id_scenarios = scenario_settings["id_scenarios"]
         self.type_scenario = scenario_settings["type_scenario"]
 
-
     def add_scenario_tread(self):
         scenario = self.settings
         type_scenario = scenario["type_scenario"]
@@ -103,7 +103,6 @@ class driver_obj:
 
     def start_tread(self):
         if self.tread != None:
-            print(self.driver)
             self.tread.driver = self.driver
             self.tread.start()
             return True
@@ -146,4 +145,10 @@ class driver_obj:
         return True
 
     def driver_close(self):
+        mla_url = "http://localhost.multiloginapp.com:35000/api/v1/profile/stop?profileId=" + self.settings["ml_token"]
+        try:
+            requests.get(mla_url)
+        except:
+            pass
+
         self.driver.quit()

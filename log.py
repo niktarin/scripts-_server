@@ -40,7 +40,6 @@ class log:
                 if arr[1] in names:
                     print(f"{arr[0]} {arr[1]} {arr[2]}")
 
-
     def save_to_file(self, commands):
 
         if "file_name" not in commands:

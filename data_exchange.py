@@ -1,6 +1,7 @@
 from threading import Thread
 import time
 import requests
+from main_obj import main_obj
 
 class data_exchange_tr(Thread):
 
@@ -26,11 +27,12 @@ class data_exchange_tr(Thread):
                     serv_requests = respons.json()
 
                     if "error_message" in serv_requests:
+                        my_object.driver_close()
                         my_object.status = "del"
                     else:
                         my_object.set_scenaroi(serv_requests)
                         my_object.status = "work"
-
+                        my_object.start()
 
     def del_obj(self):
         for my_object in self.main_hab.main_objects:
@@ -41,16 +43,16 @@ class data_exchange_tr(Thread):
         scenario = answer.json()
 
         if "error_message" in scenario:
-            return False
+            return
         else:
-            self.scenario = scenario
-            return True
-
+            obj = main_obj()
+            obj.log = self.main_hab.log
+            obj.set_scenario(scenario)
+            obj.start()
 
     def check_status_treads(self):
         for my_object in self.main_hab.main_objects:
             my_object.cheack_status()
-
 
     def check_len(self):
         len_treads = len(self.main_hab.main_objects)
@@ -60,7 +62,6 @@ class data_exchange_tr(Thread):
             return True
         else:
             return False
-
 
     def run(self):
         while self.flag_work:

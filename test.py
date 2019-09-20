@@ -9,7 +9,9 @@ my_key = "AIzaSyB6qE9djrQ16ogLekVW0lszfcIlUNHWgKE"
 my_url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng=40.714224,-73.961452&key={my_key}"
 ans = requests.get(my_url)
 ans = ans.json()
+
 print(ans)
+
 # Geocoding an address
 # geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
 
