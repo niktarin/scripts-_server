@@ -1,13 +1,13 @@
 from selenium import webdriver
 import requests
 
-from scripts.login_email import Login_email_tr
-from scripts.simple_update import Simple_update_fb
-from scripts.set_posts import Set_posts_tr
-from scripts.check_fb import Check_fb
-from scripts.сreate_fan_page import Create_fan_page_tr
-from scripts.registr_fb import Registr_fb_tr
-from scripts.load_img import load_img_tr
+
+from scripts_v2.simple_update import Simple_update_fb
+# from scripts_v2.set_posts import Set_posts_tr
+# from scripts_v2.check_fb import Check_fb
+# from scripts_v2.сreate_fan_page import Create_fan_page_tr
+# from scripts_v2.registr_fb import Registr_fb_tr
+# from scripts_v2.load_img import load_img_tr
 
 
 class main_obj:
@@ -24,7 +24,7 @@ class main_obj:
         self.scenario_status = None
         self.ml_answear = None
         self.tr_answear = None
-
+        self.obj_live = True
         self.log = log
         self.status = "work"
         self.output_data = {}
@@ -74,26 +74,26 @@ class main_obj:
         scenario = self.settings
         type_scenario = scenario["type_scenario"]
 
-        if type_scenario == "mail_login":
-            tread = Login_email_tr(scenario)
+        # if type_scenario == "mail_login":
+        #     tread = Login_email_tr(scenario)
 
-        elif type_scenario == "empty_update":
-            tread = Simple_update_fb(scenario)
+        if type_scenario == "empty_update":
+            tread = Simple_update_fb(scenario,self.log)
 
-        elif type_scenario == "check_fb":
-            tread = Check_fb(scenario)
-
-        elif type_scenario == "create_post":
-            tread = Set_posts_tr(scenario)
-
-        elif type_scenario == "create_fanpage":
-            tread = Create_fan_page_tr(scenario)
-
-        elif type_scenario == "fb_registration":
-            tread = Registr_fb_tr(scenario)
-
-        elif type_scenario == "fb_photo_update":
-            tread = load_img_tr(scenario)
+        # elif type_scenario == "check_fb":
+        #     tread = Check_fb(scenario)
+        #
+        # elif type_scenario == "create_post":
+        #     tread = Set_posts_tr(scenario)
+        #
+        # elif type_scenario == "create_fanpage":
+        #     tread = Create_fan_page_tr(scenario)
+        #
+        # elif type_scenario == "fb_registration":
+        #     tread = Registr_fb_tr(scenario)
+        #
+        # elif type_scenario == "fb_photo_update":
+        #     tread = load_img_tr(scenario)
         else:
             self.add_scenario_comment = "Не удалось определить сценарий"
             return False
@@ -117,7 +117,7 @@ class main_obj:
             self.status = "compleat"
 
     def answer(self):
-        if self.driver != None:
+        if self.obj_live:
             if not self.tread.is_alive():
                 output_data = self.tread.answer["output_data"]
                 comment = self.tread.answer["comment"]
@@ -126,7 +126,7 @@ class main_obj:
                                "comment": comment,
                                "status": status}
                 return self.answer
-            return False
+            return None
         else:
             return self.answer
 
@@ -136,18 +136,21 @@ class main_obj:
                 self.answer["status"] = "Ошибка"
                 self.answer["comment"] = self.add_driver_comment
                 self.log.log_append({"name": self.tech_name, "action": "obj","text": self.add_driver_comment})
+                self.obj_live = False
                 self.status = "compleat"
 
         if not self.add_scenario_tread():
             self.answer["status"] = "Ошибка"
             self.answer["comment"] = self.add_scenario_comment
             self.log.log_append({"name": self.tech_name, "action": "obj", "text": self.add_scenario_comment})
+            self.obj_live = False
             self.status = "compleat"
 
         if not self.start_tread():
             self.answer["status"] = "Ошибка"
             self.answer["comment"] = "Не удалось запустить поток"
             self.log.log_append({"name": self.tech_name, "action": "obj", "text": "Не удалось запустить поток"})
+            self.obj_live = False
             self.status = "compleat"
 
     def driver_close(self):

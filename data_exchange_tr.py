@@ -42,11 +42,11 @@ class data_exchange_tr(Thread):
     def get_scenaroi(self):
         answer = requests.get('http://arbcapsule.club/api/scenarios/get-one')
         scenario = answer.json()
-
+        print(scenario)
         if "error_message" in scenario:
             return
         else:
-            obj = main_obj()
+            obj = main_obj(self.main_hab.log)
             obj.log = self.main_hab.log
             obj.set_scenario(scenario)
             obj.start()
@@ -60,6 +60,7 @@ class data_exchange_tr(Thread):
     def check_len(self):
         len_treads = len(self.main_hab.main_objects)
         max_treads = self.main_hab.max_tread
+
         if len_treads >= max_treads:
             return True
         else:
@@ -70,9 +71,11 @@ class data_exchange_tr(Thread):
             self.check_status_treads()
             self.set_answear()
             self.del_obj()
-            if not self.check_len():
+
+            if self.check_len():
                 time.sleep(self.wait_time)
                 continue
+
             self.get_scenaroi()
 
 
