@@ -1,4 +1,4 @@
-from base_tread import Base_tr
+from scripts.base_tread import Base_tr
 
 
 class Create_advertising(Base_tr):

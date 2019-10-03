@@ -1,4 +1,4 @@
-from base_tread import Base_tr
+from scripts.base_tread import Base_tr
 import time
 
 class Login_email_tr(Base_tr):

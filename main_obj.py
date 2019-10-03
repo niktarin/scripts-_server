@@ -12,21 +12,22 @@ from scripts.load_img import load_img_tr
 
 class main_obj:
 
-    def __init__(self):
+    def __init__(self, log):
         self.settings = None
         self.driver = None
-        self.id_scenarios = ""
-        self.type_scenario = ""
-        self.output_data = {}
-        self.add_driver_comment = ""
-        self.add_scenario_comment = ""
-        self.comment = ""
+        self.id_scenarios = None
+        self.type_scenario = None
+        self.add_driver_comment = None
+        self.add_scenario_comment = None
+        self.comment = None
         self.tech_name = None
-        self.status = "work"
-        self.scenario_sattus = None
+        self.scenario_status = None
         self.ml_answear = None
         self.tr_answear = None
-        self.log = None
+
+        self.log = log
+        self.status = "work"
+        self.output_data = {}
         self.answer = {"id_scenarios": self.id_scenarios,
                        "type_scenario": self.type_scenario,
                        "output_data": {},
@@ -37,13 +38,11 @@ class main_obj:
         if self.settings == None:
             self.add_driver_comment = "Не удалось запустить аккаунт"
             return False
-
         try:
             mla_url = 'http://127.0.0.1:35000/api/v1/profile/start?automation=true&profileId=' + self.settings[
                 "ml_token"]
             try:
                 resp = requests.get(mla_url)
-
                 self.ml_answear = resp.json()
             except:
                 self.add_driver_comment = "Ошибка мультилогина"
@@ -59,6 +58,7 @@ class main_obj:
                 return False
             else:
                 self.driver = webdriver.Remote(command_executor=self.ml_answear['value'])
+                self.log.log_append({"name": self.tech_name, "action": "obj", "text": "Аккаунт запущен"})
                 return True
         except:
             self.add_driver_comment = "Ошибка подключения к мультилогину(Возможно он не запущенн)"
@@ -110,39 +110,45 @@ class main_obj:
             return False
 
     def tr_chec_status(self):
+
         if self.tread.is_alive():
             self.status = "work"
         else:
             self.status = "compleat"
 
     def answer(self):
-        if not self.tread.is_alive():
-            output_data = self.tread.answer["output_data"]
-            comment = self.tread.answer["comment"]
-            status = self.tread.answer["status"]
-
-            self.answer = {"output_data": output_data,
-                           "comment": comment,
-                           "status": status}
-            return self.answer
-        else:
+        if self.driver != None:
+            if not self.tread.is_alive():
+                output_data = self.tread.answer["output_data"]
+                comment = self.tread.answer["comment"]
+                status = self.tread.answer["status"]
+                self.answer = {"output_data": output_data,
+                               "comment": comment,
+                               "status": status}
+                return self.answer
             return False
+        else:
+            return self.answer
 
     def start(self):
         if self.driver == None:
             if not self.add_driver():
                 self.answer["status"] = "Ошибка"
                 self.answer["comment"] = self.add_driver_comment
-                return
+                self.log.log_append({"name": self.tech_name, "action": "obj","text": self.add_driver_comment})
+                self.status = "compleat"
 
         if not self.add_scenario_tread():
             self.answer["status"] = "Ошибка"
-            self.answer["comment"] = self.add_driver_comment
+            self.answer["comment"] = self.add_scenario_comment
+            self.log.log_append({"name": self.tech_name, "action": "obj", "text": self.add_scenario_comment})
+            self.status = "compleat"
 
         if not self.start_tread():
             self.answer["status"] = "Ошибка"
             self.answer["comment"] = "Не удалось запустить поток"
-        return True
+            self.log.log_append({"name": self.tech_name, "action": "obj", "text": "Не удалось запустить поток"})
+            self.status = "compleat"
 
     def driver_close(self):
         mla_url = "http://localhost.multiloginapp.com:35000/api/v1/profile/stop?profileId=" + self.settings["ml_token"]
@@ -150,5 +156,7 @@ class main_obj:
             requests.get(mla_url)
         except:
             pass
-
-        self.driver.quit()
+        try:
+            self.driver.quit()
+        except:
+            pass

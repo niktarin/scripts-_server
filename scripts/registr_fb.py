@@ -1,7 +1,7 @@
 import requests
 from selenium import webdriver
 import json
-from base_tread import Base_tr
+from scripts.base_tread import Base_tr
 import random
 import time
 from selenium.webdriver.common.keys import Keys

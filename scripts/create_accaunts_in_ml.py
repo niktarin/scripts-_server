@@ -1,5 +1,5 @@
 import requests
-from base_tread import Base_tr
+from scripts.base_tread import Base_tr
 
 class Create_accaunts_in_ml(Base_tr):
     token = "57e44d8f5a5b87b653a0801353fbe54706e92575"

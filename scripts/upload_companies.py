@@ -1,5 +1,5 @@
 import time
-from base_tread import Base_tr
+from scripts.base_tread import Base_tr
 
 
 class Create_fan_page_tr(Base_tr):
