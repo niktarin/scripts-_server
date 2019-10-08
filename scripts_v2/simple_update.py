@@ -2,13 +2,41 @@ from scripts_v2.base_tread_v2 import Base_tr
 import random
 import time
 
+
 class Simple_update_fb(Base_tr):
 
+    def my_page_scroll(self):
+        xpath = "//span[@class='_2md']"
+        if not self.click_to_xpath(xpath, appointment="переход на старнотовуюстраницу"):
+            self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
+
+        xpath = "(//div[@class='linkWrap noCount'])[1]"
+        if not self.click_to_xpath(xpath, appointment="Переход на личную страницу"):
+            self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
+
+        down = random.randint(100, 400)
+        self.scroll_page_down(down, appointment="Скролл вних")
+        time.sleep(5)
+        self.scroll_page_up(down, appointment="Скролл вверх")
+        return True
+
+
     def start_page_scroll(self):
-        self.click_esc()
-        down = random.randint(50, 300)
-        self.scroll_page_down(down)
-        self.scroll_page_up(down)
+
+        xpath = "//span[@class='_2md']"
+        if not self.click_to_xpath(xpath, appointment="переход на старнотовуюстраницу"):
+            self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
+
+        down = random.randint(100, 400)
+        self.scroll_page_down(down, appointment="Скролл вних")
+        time.sleep(5)
+        self.scroll_page_up(down, appointment="Скролл вверх")
         return True
 
     def fan_page_scroll(self):
@@ -26,18 +54,18 @@ class Simple_update_fb(Base_tr):
                 self.click_esc()
                 down = random.randint(50, 300)
                 self.scroll_page_down(down)
+                time.sleep(5)
                 self.scroll_page_up(down)
             except:
                 pass
-
-        return (True)
+        return True
 
     def friends_page_scroll(self):
         self.driver.get("https://www.facebook.com/find-friends/browser/")
         self.click_esc()
         down = random.randint(15, 200)
-        self.scroll_page_down(down)
-        self.scroll_page_up(down)
+        self.scroll_page_down(down, appointment="Скролл вних")
+        self.scroll_page_up(down, appointment="Скролл вверх")
         return True
 
     def refresh(self):
@@ -52,7 +80,8 @@ class Simple_update_fb(Base_tr):
         if not self.check():
             return
 
-        arr_action = [self.start_page_scroll,
+        arr_action = [self.my_page_scroll,
+                      self.start_page_scroll,
                       self.fan_page_scroll,
                       self.friends_page_scroll]
 
@@ -61,15 +90,8 @@ class Simple_update_fb(Base_tr):
         for act in arr_action:
             if not act():
                 return
+
             self.refresh()
 
         self.answer["comment"] = "Пустое обновление прошло успешно"
         self.answer["status"] = "Выполнен"
-        self.driver.quit()
-
-
-        # xpath = "//span[@class='_2md']"
-        # if not self.click_to_xpath(xpath):
-        #     self.answer["status"] = "Ошибка"
-        #     self.answer["comment"] = self.error_comment
-        #     return False

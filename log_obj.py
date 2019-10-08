@@ -9,8 +9,17 @@ class log:
 
     def save_auto(self, commands):
         if "flag" in commands:
-            self.auto_save_flag = commands["flag"]
-            return (f"Установленн флаг {self.auto_save_flag}")
+            flag = commands["flag"].lower()
+            if flag in ["true","+"]:
+                flag = True
+            elif flag in ["false","-"]:
+                flag = False
+            else:
+                return (f"Не удалось установленн флаг {commands['flag']}")
+
+            self.auto_save_flag = flag
+            return (f"Установленн флаг {flag}")
+
         else:
             return ("Flag а не найден")
 
