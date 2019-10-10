@@ -7,16 +7,32 @@ class Simple_update_fb(Base_tr):
 
     def my_page_scroll(self):
         xpath = "//span[@class='_2md']"
-        if not self.click_to_xpath(xpath, appointment="переход на старнотовуюстраницу"):
-            self.answer["status"] = "Ошибка сервера"
+        if not self.click_to_xpath(xpath, appointment="переход на личную страницу"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
 
-        xpath = "(//div[@class='linkWrap noCount'])[1]"
-        if not self.click_to_xpath(xpath, appointment="Переход на личную страницу"):
-            self.answer["status"] = "Ошибка сервера"
-            self.answer["comment"] = self.error_comment
-            return False
+        if self.flag_email_not_confirm:
+            xpath = "//div[@data-click='profile_icon']"
+            if not self.click_to_xpath(xpath, appointment="переход на личную страницу"):
+                if self.accaunt_block_flag:
+                    self.answer["status"] = "Ошибка"
+                else:
+                    self.answer["status"] = "Ошибка сервера"
+                self.answer["comment"] = self.error_comment
+                return False
+        else:
+            xpath = "(//div[@class='linkWrap noCount'])[1]"
+            if not self.click_to_xpath(xpath, appointment="Переход на личную страницу"):
+                if self.accaunt_block_flag:
+                    self.answer["status"] = "Ошибка"
+                else:
+                    self.answer["status"] = "Ошибка сервера"
+                self.answer["comment"] = self.error_comment
+                return False
 
         down = random.randint(100, 400)
         self.scroll_page_down(down, appointment="Скролл вних")
@@ -24,14 +40,25 @@ class Simple_update_fb(Base_tr):
         self.scroll_page_up(down, appointment="Скролл вверх")
         return True
 
-
     def start_page_scroll(self):
-
         xpath = "//span[@class='_2md']"
-        if not self.click_to_xpath(xpath, appointment="переход на старнотовуюстраницу"):
-            self.answer["status"] = "Ошибка сервера"
+        if not self.click_to_xpath(xpath, appointment="переход на стартовую страницу"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
+
+        if self.flag_email_not_confirm:
+            xpath = "//div[@data-click='profile_icon']"
+            if not self.click_to_xpath(xpath, appointment="переход на стартовую страницу"):
+                if self.accaunt_block_flag:
+                    self.answer["status"] = "Ошибка"
+                else:
+                    self.answer["status"] = "Ошибка сервера"
+                self.answer["comment"] = self.error_comment
+                return False
 
         down = random.randint(100, 400)
         self.scroll_page_down(down, appointment="Скролл вних")
@@ -76,22 +103,24 @@ class Simple_update_fb(Base_tr):
             time.sleep(t)
 
     def run(self):
-
-        if not self.check():
-            return
-
-        arr_action = [self.my_page_scroll,
-                      self.start_page_scroll,
-                      self.fan_page_scroll,
-                      self.friends_page_scroll]
-
-        random.shuffle(arr_action)
-
-        for act in arr_action:
-            if not act():
+        try:
+            if not self.check():
                 return
 
-            self.refresh()
+            arr_action = [self.my_page_scroll,
+                          self.start_page_scroll,
+                          self.fan_page_scroll,
+                          self.friends_page_scroll]
 
-        self.answer["comment"] = "Пустое обновление прошло успешно"
-        self.answer["status"] = "Выполнен"
+            random.shuffle(arr_action)
+
+            for act in arr_action:
+                if not act():
+                    return
+                self.refresh()
+
+            self.answer["comment"] = "Пустое обновление прошло успешно"
+            self.answer["status"] = "Выполнен"
+        except:
+            self.answer["status"] = "Ошибка"
+            self.answer["comment"] = "Не предвиденная ошибка потока сенария"

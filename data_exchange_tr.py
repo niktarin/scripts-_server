@@ -13,32 +13,36 @@ class data_exchange_tr(Thread):
         self.wait_time = 10
         self.scenario = None
 
+
     def set_answer(self):
         for my_object in self.main_hab.main_objects:
             if my_object.status == "compleat":
                 answer = my_object.get_answer()
                 if answer["status"] == "Ошибка сервера":
-                    break
-                try:
-                    respons = requests.post('http://arbcapsule.club/api/scenarios/script-result', json=answer)
                     self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
-                except:
-                    self.log.log_append({"name": "server", "action": "return_answer", "text": "Не удалось вернуть ответ на сервер"})
+                    my_object.driver_close()
+                    my_object.status = "del"
+                else:
+                    try:
+                        respons = requests.post('http://arbcapsule.club/api/scenarios/script-result', json=answer)
+                        self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
+                    except:
+                        self.log.log_append({"name": "server", "action": "return_answer", "text": "Не удалось вернуть ответ на сервер"})
+                        continue
 
-                    continue
-                code = respons.status_code
-                # my_object.driver_close()
-                # my_object.status = "del"
-                if code == 200:
-                    serv_requests = respons.json()
+                    code = respons.status_code
+                    # my_object.driver_close()
+                    # my_object.status = "del"
+                    if code == 200:
+                        serv_requests = respons.json()
 
-                    if "message" in serv_requests:
-                        my_object.driver_close()
-                        my_object.status = "del"
-                    else:
-                        my_object.set_scenario(serv_requests)
-                        my_object.status = "work"
-                        my_object.start()
+                        if "message" in serv_requests:
+                            my_object.driver_close()
+                            my_object.status = "del"
+                        else:
+                            my_object.set_scenario(serv_requests)
+                            my_object.status = "work"
+                            my_object.start()
 
     def del_obj(self):
         for index, my_object in enumerate(self.main_hab.main_objects):

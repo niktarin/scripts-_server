@@ -1,9 +1,11 @@
 from selenium import webdriver
 import requests
 import time
+from datetime import datetime
+import os
 from selenium.webdriver.remote.command import Command
 from scripts_v2.simple_update import Simple_update_fb
-
+from scripts_v2.сreate_fan_page import Create_fan_page
 
 # from scripts_v2.set_posts import Set_posts_tr
 # from scripts_v2.check_fb import Check_fb
@@ -25,7 +27,7 @@ class answer:
     def get_answer(self):
         answer = {"id_scenarios": self.id_scenarios,
                   "type_scenario": self.type_scenario,
-                  "output_data": {},
+                  "output_data": self.output_data,
                   "comment": self.comment,
                   "status": self.status}
         return answer
@@ -50,9 +52,23 @@ class main_obj:
         self.status = "work"
         self.output_data = {}
         self.ans_obj = answer()
+        self.time_start = 0
 
-    def create_driver(self):
-        pass
+    def screenshot_page(self):
+        try:
+            # now = datetime.now()
+            # time = now.strftime("%d-%m-%Y")
+            path = f".\log\\{self.tech_name}_{self.type_scenario}.png"
+
+            try:
+                os.remove(path)
+            except:
+                pass
+
+            self.driver.save_screenshot(path)
+            return path
+        except:
+            return None
 
     def add_driver(self):
         if self.settings == None:
@@ -73,6 +89,17 @@ class main_obj:
                 if index > -1:
                     self.add_driver_comment = "Аккаунт уже запущен"
                     return False
+
+                index = self.ml_answear["value"].find("profile not found")
+                if index > -1:
+                    self.add_driver_comment = "Аккаунт не найден в мультилогине"
+                    return False
+
+                index = self.ml_answear["value"].find("connect through proxy")
+                if index > -1:
+                    self.add_driver_comment = "Прокси не активен"
+                    return False
+
             self.add_driver_comment = f"Не удалось запустить аккаунт ({self.ml_answear})"
             return False
 
@@ -107,8 +134,8 @@ class main_obj:
         # elif type_scenario == "create_post":
         #     tread = Set_posts_tr(scenario)
         #
-        # elif type_scenario == "create_fanpage":
-        #     tread = Create_fan_page_tr(scenario)
+        elif type_scenario == "create_fanpage":
+            tread = Create_fan_page(scenario, self.log)
         #
         # elif type_scenario == "fb_registration":
         #     tread = Registr_fb_tr(scenario)
@@ -127,6 +154,7 @@ class main_obj:
         if self.tread != None:
             self.tread.driver = self.driver
             self.tread.start()
+            self.time_start = time.time()
             return True
         else:
             return False
@@ -151,21 +179,24 @@ class main_obj:
                 self.ans_obj.output_data = self.tread.answer["output_data"]
                 self.ans_obj.comment = self.tread.answer["comment"]
                 self.ans_obj.status = self.tread.answer["status"]
+
+                time_work = time.time() - self.time_start
+                m = round((time_work/60),1)
+                self.log.log_append({"name": "server", "action": "time", "text": f"врем работы {self.type_scenario} ~ {m} минут"})
+
+                if self.ans_obj.status == "Ошибка сервера" or self.ans_obj.status == "Ошибка":
+                    path = self.screenshot_page()
+                    self.log.log_append({"name": self.tech_name, "action": "scren", "text": path})
                 return self.ans_obj.get_answer()
+
             return None
         else:
             return self.ans_obj.get_answer()
 
     def start(self):
-        if self.driver == None:            
-            for i in range(3):
-                if self.add_driver():
-                    break
-                else:
-                    time.sleep(5)
-
-            if self.driver == None:
-                self.ans_obj.status = "Ошибка сервера"
+        if self.driver == None:
+            if not self.add_driver():
+                self.ans_obj.status = "Ошибка"
                 self.ans_obj.comment = self.add_driver_comment
                 self.log.log_append({"name": self.tech_name, "action": "obj", "text": self.add_driver_comment})
                 self.obj_live = False

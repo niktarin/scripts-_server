@@ -735,7 +735,7 @@ class Registr_fb_tr(Base_tr):
 
         self.giv_name()
 
-        link = 'https://www.facebook.com/profile.php?id=100041459049145&ref=bookmarks'
+        link = 'https://www.facebook.com'
         if not self.get_tu_link(link):
             self.answer["status"] = "Ошибка"
             self.answer["comment"] = f"Не удалось зайти на https://www.facebook.com"
@@ -749,7 +749,6 @@ class Registr_fb_tr(Base_tr):
             self.answer["comment"] = f"Аккаунт заблокирован"
             self.driver.quit()
             return
-
 
         if not self.form_filling():
             self.driver.quit()

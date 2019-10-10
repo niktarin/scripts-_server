@@ -15,17 +15,35 @@ class Base_tr(Thread):
         self.driver = None
         self.settings = scenario_settings
         self.log = log
+        self.flag_email_not_confirm = False
         self.tech_name = scenario_settings["tech_name"]
         self.error_comment = None
+        self.accaunt_block_flag = False
         self.answer = {"output_data": {},
                        "comment": "",
                        "status": "", }
 
-    def screenshot_page(self, path):
-        try:
-            self.driver.save_screenshot(path)
+
+
+    def change_language(self, language="English (UK)"):
+
+        self.driver.get("https://www.facebook.com/settings?tab=language&section=account&view")
+        xpath = "//select[@name='new_language']"
+        if not self.set_visible_text(xpath, language, appointment="выбор языка из списка"):
+            self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
+
+        xpath = "//label[@class='submit uiButton uiButtonConfirm']"
+        if self.find_xpath(xpath):
+            if not self.click_to_xpath(xpath, appointment="подтверждение смены языка"):
+                self.answer["status"] = "Ошибка сервера"
+                self.answer["comment"] = self.error_comment
+                return False
+            time.sleep(5)
             return True
-        except:
+
+        else:
             return False
 
     def get_link(self, link, appointment=None, circle=4, time_wait=1):
@@ -48,17 +66,24 @@ class Base_tr(Thread):
 
     def check_block(self):
         if "facebook.com/checkpoint/block/" in self.driver.current_url:
+            self.accaunt_block_flag = True
             return (False, "Аккаунт заблокирован")
         elif "facebook.com/checkpoint/" in self.driver.current_url:
+            self.accaunt_block_flag = True
             return (False, "Аккаунт на чекпоинте")
         else:
+            self.accaunt_block_flag = False
             return (True, "Аккаунт не заблокирован")
 
-    def find_xpath(self, xpath, time_wait=15):
+    def find_xpath(self, xpath, time_wait=15,action="find"):
         try:
             WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
+            commant = f"найден элемент {xpath}"
+            self.log.log_append({"name": self.tech_name, "action": action, "text": commant})
             return True
         except:
+            commant = f"НЕ найден элемент {xpath}"
+            self.log.log_append({"name": self.tech_name, "action": action, "text": commant})
             return False
 
     def click_to_xpath(self, xpath, action="action", appointment=None, time_wait=15, esc_flag=True, error=True):
@@ -73,7 +98,6 @@ class Base_tr(Thread):
 
         if esc_flag:
             self.click_esc()
-
             try:
                 WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
                 elem = self.driver.find_element_by_xpath(xpath)
@@ -84,20 +108,20 @@ class Base_tr(Thread):
             except:
                 pass
 
-            flag, comment = self.check_block()
-            if not flag:
+        flag, comment = self.check_block()
+        if not flag:
+            self.log.log_append({"name": self.tech_name, "action": action, "text": comment})
+            self.error_comment = comment
+            return False
+        else:
+            if error:
+                comment = f"{appointment} / не удалось нажать {xpath}"
                 self.log.log_append({"name": self.tech_name, "action": action, "text": comment})
                 self.error_comment = comment
                 return False
             else:
-                if error:
-                    comment = f"{appointment} / не удалось нати {xpath}"
-                    self.log.log_append({"name": self.tech_name, "action": action, "text": comment})
-                    self.error_comment = comment
-                    return False
-                else:
-                    self.error_comment = comment
-                    return False
+                self.error_comment = comment
+                return False
 
     def click_to_element(self, element, action="action", appointment=None, circle=60, time_sleep=2):
         summ = 0
@@ -193,7 +217,7 @@ class Base_tr(Thread):
             {"name": self.tech_name, "action": action, "text": f"{appointment} / скролл в низ на {down})"})
         return True
 
-    def scroll_page_up(self, up=300, action="action", time_sleep=0.1,appointment=None):
+    def scroll_page_up(self, up=300, action="action", time_sleep=0.1, appointment=None):
 
         html = self.driver.find_element_by_tag_name('html')
         for i in range(up):
@@ -228,7 +252,27 @@ class Base_tr(Thread):
                     {"name": self.tech_name, "action": action, "text": f"{appointment} / не удалось нати {xpath}"})
                 return False
 
-    def set_current_index(self, xpath, index, time_wait=60, appointment=None):
+    def set_visible_text(self, xpath, text, action="action",time_wait=60, appointment=None):
+        try:
+            WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
+            element = self.driver.find_element_by_xpath(xpath)
+            select = Select(element)
+            select.select_by_visible_text(text)
+            self.log.log_append({"name": self.tech_name, "action": action,
+                                 "text": f"{appointment} / элемент {xpath} выбран текст '{text}'"})
+            return True
+        except:
+            flag, comment = self.check_block()
+            if not flag:
+                self.log.log_append({"name": self.tech_name, "action": action, "text": comment})
+                return False
+            else:
+                comment = f"{appointment} / не удалось нати {xpath}"
+                self.log.log_append({"name": self.tech_name, "action": action, "text": comment})
+                self.error_comment = comment
+                return False
+
+    def set_current_index(self, xpath, index, action="action", time_wait=60, appointment=None):
         try:
             WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
             element = self.driver.find_element_by_xpath(xpath)
@@ -243,15 +287,18 @@ class Base_tr(Thread):
                 self.log.log_append({"name": self.tech_name, "action": action, "text": comment})
                 return False
             else:
-                self.log.log_append(
-                    {"name": self.tech_name, "action": action, "text": f"{appointment} / не удалось нати {xpath}"})
+                comment = f"{appointment} / не удалось нати {xpath}"
+                self.log.log_append({"name": self.tech_name, "action": action, "text": comment})
+                self.error_comment = comment
                 return False
 
     def check_login_or_not(self):
         ar = ["https://www.facebook.com/", "https://www.facebook.com"]
         if self.driver.current_url in ar:
-            return (True)
-        return (False)
+            return True
+        elif "www.facebook.com/profile.php" in self.driver.current_url:
+            return True
+        return False
 
     def check_xpath(self, xpath, time_wait=60):
         try:
@@ -287,13 +334,22 @@ class Base_tr(Thread):
             xpath = "//button[@id='loginbutton']"
             if self.click_to_xpath(xpath=xpath, appointment="Кнопка логина"):
                 return True
+
+        if "facebook.com/confirmemail.php" in self.driver.current_url:
+            xpath = "//div[@data-click='profile_icon']"
+            if not self.click_to_xpath(xpath, appointment="Акк не подтвержден, нажимем на кнопку"):
+                self.answer["status"] = "Ошибка сервера"
+                self.answer["comment"] = self.error_comment
+                return False
+
+            self.flag_email_not_confirm = True
         return False
 
     def check(self):
         if self.to_start_page():
-            self.log.log_append({"name": self.tech_name, "action": "action","text": "Логин / Аккаунт залогинелся"})
+            self.log.log_append({"name": self.tech_name, "action": "action", "text": "Логин / Аккаунт залогинелся"})
         else:
-            self.log.log_append({"name": self.tech_name, "action": "action","text": "Логин / Аккаунт не залогинелся"})
+            self.log.log_append({"name": self.tech_name, "action": "action", "text": "Логин / Аккаунт не залогинелся"})
 
         flag, ans = self.check_block()
         if not flag:
