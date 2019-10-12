@@ -22,27 +22,33 @@ class data_exchange_tr(Thread):
                     self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
                     my_object.driver_close()
                     my_object.status = "del"
-                else:
-                    try:
-                        respons = requests.post('http://arbcapsule.club/api/scenarios/script-result', json=answer)
-                        self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
-                    except:
-                        self.log.log_append({"name": "server", "action": "return_answer", "text": "Не удалось вернуть ответ на сервер"})
-                        continue
 
-                    code = respons.status_code
-                    # my_object.driver_close()
-                    # my_object.status = "del"
-                    if code == 200:
-                        serv_requests = respons.json()
+                if answer["status"] == "Ошибка":
+                    self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
+                    my_object.driver_close()
+                    my_object.status = "del"
 
-                        if "message" in serv_requests:
-                            my_object.driver_close()
-                            my_object.status = "del"
-                        else:
-                            my_object.set_scenario(serv_requests)
-                            my_object.status = "work"
-                            my_object.start()
+                # else:
+                try:
+                    respons = requests.post('http://arbcapsule.club/api/scenarios/script-result', json=answer)
+                    self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
+                except:
+                    self.log.log_append({"name": "server", "action": "return_answer", "text": "Не удалось вернуть ответ на сервер"})
+                    continue
+
+                code = respons.status_code
+                # my_object.driver_close()
+                # my_object.status = "del"
+                if code == 200:
+                    serv_requests = respons.json()
+
+                    if "message" in serv_requests:
+                        my_object.driver_close()
+                        my_object.status = "del"
+                    else:
+                        my_object.set_scenario(serv_requests)
+                        my_object.status = "work"
+                        my_object.start()
 
     def del_obj(self):
         for index, my_object in enumerate(self.main_hab.main_objects):

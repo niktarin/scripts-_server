@@ -1,4 +1,4 @@
-from scripts.base_tread import Base_tr
+from .base_tread import Base_tr
 
 class Check_fb(Base_tr):
 

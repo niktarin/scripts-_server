@@ -1,4 +1,8 @@
-from scripts.base_tread import Base_tr
+import time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+from .base_tread import Base_tr
 
 
 class Create_advertising(Base_tr):

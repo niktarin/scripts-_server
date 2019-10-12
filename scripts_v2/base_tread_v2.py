@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from threading import Thread
 import time
+import json
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -22,8 +23,6 @@ class Base_tr(Thread):
         self.answer = {"output_data": {},
                        "comment": "",
                        "status": "", }
-
-
 
     def change_language(self, language="English (UK)"):
 
@@ -46,7 +45,7 @@ class Base_tr(Thread):
         else:
             return False
 
-    def get_link(self, link, appointment=None, circle=4, time_wait=1):
+    def get_link(self, link, appointment=None, action="get_link", circle=4, time_wait=1):
         try:
             self.driver.get(link)
             self.click_esc(circle=circle, time_wait=time_wait)
@@ -59,10 +58,33 @@ class Base_tr(Thread):
                  "text": f"{appointment}/ Не удалось перейти по ссылке  {link}"})
             return False
 
+    def check_text_in_link(self, text, action="find", appointment="find_text_link", circle=15, time_wait=1):
+        for i in range(circle):
+            url = self.driver.current_url
+            if text in url:
+                self.log.log_append(
+                    {"name": self.tech_name, "action": action, "text": f"{appointment}/ текст найден {text}"})
+                return True
+            else:
+                time.sleep(time_wait)
+
+        self.log.log_append(
+            {"name": self.tech_name, "action": action, "text": f"{appointment}/ текст не найден {text}"})
+        return False
+
     def click_esc(self, circle=4, time_wait=1):
         for i in range(circle):
             webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
             time.sleep(time_wait)
+
+    def check_ip_data(self):
+        self.get_link("http://ipinfo.io/json")
+        el = self.return_el_by_xpath("//pre")
+        if el != None:
+            self.ip_settings = json.loads(el.text)
+            return True
+        else:
+            return False
 
     def check_block(self):
         if "facebook.com/checkpoint/block/" in self.driver.current_url:
@@ -75,7 +97,19 @@ class Base_tr(Thread):
             self.accaunt_block_flag = False
             return (True, "Аккаунт не заблокирован")
 
-    def find_xpath(self, xpath, time_wait=15,action="find"):
+    def return_el_by_xpath(self, xpath, time_wait=15, action="return_el"):
+        try:
+            WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
+            element = self.driver.find_element_by_xpath(xpath)
+            commant = f"найден элемент {xpath}"
+            self.log.log_append({"name": self.tech_name, "action": action, "text": commant})
+            return element
+        except:
+            commant = f"НЕ найден элемент {xpath}"
+            self.log.log_append({"name": self.tech_name, "action": action, "text": commant})
+            return None
+
+    def find_xpath(self, xpath, time_wait=15, action="find"):
         try:
             WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
             commant = f"найден элемент {xpath}"
@@ -171,7 +205,7 @@ class Base_tr(Thread):
                 self.error_comment = comment
                 return False
 
-    def window_handles_go(self, handles, appointment=None):
+    def window_handles_go(self, handles, action="handles_go", appointment=None):
         lenght = len(self.driver.window_handles)
         url = self.driver.current_url
         if handles >= lenght:
@@ -190,7 +224,7 @@ class Base_tr(Thread):
                 f"{appointment}/ Ошибка переход в вкладку {handles}  количесство вкладок {lenght} текущая ссылка {url}"})
             return False
 
-    def enter_click(self, xpath, appointment=None, time_wait=60):
+    def enter_click(self, xpath, action="enter_clic", appointment=None, time_wait=60):
         try:
             WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
             element = self.driver.find_element_by_xpath(xpath)
@@ -228,7 +262,7 @@ class Base_tr(Thread):
             {"name": self.tech_name, "action": action, "text": f"{appointment} / скролл в верх на {up})"})
         return True
 
-    def selected_chec_boxs(self, xpath, index, time_wait=60, appointment=None):
+    def selected_chec_boxs(self, xpath, index, action="selected_chec",time_wait=60, appointment=None):
         try:
             WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
             elements = self.driver.find_elements_by_xpath(xpath)
@@ -252,7 +286,7 @@ class Base_tr(Thread):
                     {"name": self.tech_name, "action": action, "text": f"{appointment} / не удалось нати {xpath}"})
                 return False
 
-    def set_visible_text(self, xpath, text, action="action",time_wait=60, appointment=None):
+    def set_visible_text(self, xpath, text, action="action", time_wait=60, appointment=None):
         try:
             WebDriverWait(self.driver, time_wait).until(EC.presence_of_element_located((By.XPATH, xpath)))
             element = self.driver.find_element_by_xpath(xpath)
@@ -279,7 +313,7 @@ class Base_tr(Thread):
             select = Select(element)
             select.select_by_index(index)
             self.log.log_append({"name": self.tech_name, "action": action,
-                                 "text": f"{appointment} / элемент{xpath} выбран индекс {index}"})
+                                 "text": f"{appointment} / элемент {xpath} выбран индекс {index}"})
             return True
         except:
             flag, comment = self.check_block()

@@ -1,8 +1,7 @@
-from scripts.base_tread import Base_tr
+from .base_tread import Base_tr
 import os
 import pandas as pd
-
-
+import base64
 class Load_companies_tr(Base_tr):
 
     def run(self):

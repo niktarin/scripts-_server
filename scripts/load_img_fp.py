@@ -1,6 +1,6 @@
 import requests
 from selenium import webdriver
-from scripts.base_tread import Base_tr
+from .base_tread import Base_tr
 import time
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains

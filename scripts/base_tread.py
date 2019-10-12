@@ -6,7 +6,10 @@ import time
 import json
 from selenium.webdriver.support.select import Select
 from selenium.common.exceptions import NoSuchElementException
-
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 class Base_tr(Thread):
 
@@ -30,8 +33,6 @@ class Base_tr(Thread):
             except NoSuchElementException:
                 time.sleep(time_sleep)
             summ += 1
-
-
         self.answer["status"] = "Ошибка"
         self.answer["comment"] = f"Не удалось найти {xpath}"
         return (False)
@@ -46,7 +47,7 @@ class Base_tr(Thread):
                 if json["status"] == "ERROR":
                     if "value" in json:
                         index =  json["value"].find("active already")
-
+                
                         if index > -1:
                             json = {"answer": False, "comment": "Аккаунт уже запущен"}
                             return json
@@ -99,6 +100,8 @@ class Base_tr(Thread):
                 element.click()
                 return (True)
             except:
+                webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
+                time.sleep(1)
                 summ += 1
                 time.sleep(time_sleep)
 
@@ -191,6 +194,7 @@ class Base_tr(Thread):
             if self.check_xpath(xpath):
                 element = self.driver.find_element_by_xpath(xpath)
                 select = Select(element)
+                
                 select.select_by_index(index)
                 return (True)
             else:
@@ -255,12 +259,21 @@ class Base_tr(Thread):
         except:
             return (False)
 
+    def check_ip_data(self):
+        self.driver.get("http://ipinfo.io/json")
+        el = self.driver.find_element_by_xpath("//pre")
+        self.ip_settings = json.loads(el.text)
+
     def check(self):
 
         answer = self.connect_to_multilogin()
         if not answer["answer"]:
             self.answer["status"] = "Ошибка"
             self.answer["comment"] = answer["comment"]
+            try:
+                self.driver.quit()
+            except:
+                pass
             return (False)
 
         self.to_start_page()
@@ -277,14 +290,13 @@ class Base_tr(Thread):
             self.answer["comment"] = f"Не удалось залогиниться"
             return (False)
 
-
         webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
         time.sleep(3)
         webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
 
 
         xpath = "//div[@data-tooltip-display='overflow' and text()='Continue']"
-        if self.find_xpath(xpath=xpath,circle=5,time_sleep=1):
+        if self.find_xpath(xpath=xpath,circle=7,time_sleep=1):
             self.click_to_xpath(xpath)
 
             xpath = "//div[@data-tooltip-display='overflow' and text()='Keep Off']"
@@ -292,5 +304,15 @@ class Base_tr(Thread):
 
             xpath = "//div[@data-tooltip-display='overflow' and text()='Close']"
             self.click_to_xpath(xpath)
+        else:
+            xpath = "//div[@data-tooltip-display='overflow' and text()='Review Setting']"
+            if self.find_xpath(xpath=xpath,circle=7,time_sleep=1):
+                self.click_to_xpath(xpath)
+
+                xpath = "//div[@data-tooltip-display='overflow' and text()='Keep Off']"
+                self.click_to_xpath(xpath)
+
+                xpath = "//div[@data-tooltip-display='overflow' and text()='Close']"
+                self.click_to_xpath(xpath)
 
         return (True)

@@ -1,7 +1,11 @@
 import requests
 from selenium import webdriver
-from scripts.base_tread import Base_tr
+import json
+from .base_tread import Base_tr
+import random
 import time
+import base64
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import os
 from selenium.webdriver.common.action_chains import ActionChains

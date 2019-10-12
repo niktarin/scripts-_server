@@ -1,6 +1,9 @@
 import time
 
-from scripts.base_tread import Base_tr
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+from .base_tread import Base_tr
 
 
 class Create_fan_page_tr(Base_tr):

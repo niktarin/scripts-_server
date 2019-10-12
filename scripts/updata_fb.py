@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from scripts.base_tread import Base_tr
+from .base_tread import Base_tr
 import random
 import time
 

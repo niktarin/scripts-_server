@@ -122,5 +122,6 @@ class Simple_update_fb(Base_tr):
             self.answer["comment"] = "Пустое обновление прошло успешно"
             self.answer["status"] = "Выполнен"
         except:
+            self.log.log_append({"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
             self.answer["status"] = "Ошибка"
-            self.answer["comment"] = "Не предвиденная ошибка потока сенария"
+            self.answer["comment"] = "Не предвиденная ошибка потока сценария"

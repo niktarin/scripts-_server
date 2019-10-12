@@ -1,16 +1,15 @@
 from selenium import webdriver
 import requests
 import time
-from datetime import datetime
 import os
 from selenium.webdriver.remote.command import Command
 from scripts_v2.simple_update import Simple_update_fb
 from scripts_v2.сreate_fan_page import Create_fan_page
-
+from scripts_v2.create_BM import Create_bm_tr
 # from scripts_v2.set_posts import Set_posts_tr
 # from scripts_v2.check_fb import Check_fb
 # from scripts_v2.сreate_fan_page import Create_fan_page_tr
-# from scripts_v2.registr_fb import Registr_fb_tr
+from scripts_v2.registr_fb import Registr_fb_tr
 # from scripts_v2.load_img import load_img_tr
 
 class answer:
@@ -127,7 +126,8 @@ class main_obj:
         if type_scenario == "empty_update":
             tread = Simple_update_fb(scenario, self.log)
 
-
+        elif type_scenario == "fb_create_bm":
+            tread = Create_bm_tr(scenario, self.log)
         # elif type_scenario == "check_fb":
         #     tread = Check_fb(scenario)
         #
@@ -137,8 +137,8 @@ class main_obj:
         elif type_scenario == "create_fanpage":
             tread = Create_fan_page(scenario, self.log)
         #
-        # elif type_scenario == "fb_registration":
-        #     tread = Registr_fb_tr(scenario)
+        elif type_scenario == "fb_registration":
+            tread = Registr_fb_tr(scenario, self.log)
         #
         # elif type_scenario == "fb_photo_update":
         #     tread = load_img_tr(scenario)
@@ -205,7 +205,7 @@ class main_obj:
 
         if not self.add_scenario_tread():
             self.ans_obj.status = "Ошибка сервера"
-            self.ans_obj.status = self.add_scenario_comment
+            self.ans_obj.comment = self.add_scenario_comment
             self.log.log_append({"name": self.tech_name, "action": "obj", "text": self.add_scenario_comment})
             self.obj_live = False
             self.status = "compleat"
@@ -213,19 +213,21 @@ class main_obj:
 
         if not self.start_tread():
             self.ans_obj.status = "Ошибка сервера"
-            self.ans_obj.status = "Не удалось запустить поток"
+            self.ans_obj.comment = "Не удалось запустить поток"
             self.log.log_append({"name": self.tech_name, "action": "obj", "text": "Не удалось запустить поток"})
             self.obj_live = False
             self.status = "compleat"
 
     def driver_close(self):
+        try:
+            self.driver.quit()
+        except:
+            pass
+
         mla_url = "http://localhost.multiloginapp.com:35000/api/v1/profile/stop?profileId=" + self.settings["ml_token"]
         try:
             requests.get(mla_url)
         except:
             pass
-        try:
-            self.driver.quit()
-        except:
-            pass
+
         self.log.log_append({"name": self.tech_name, "action": "driver_close", "text": f"Драйвер {self.tech_name} закрыт"})

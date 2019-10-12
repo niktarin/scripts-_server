@@ -1,6 +1,7 @@
+import base64
 import time
-from scripts.base_tread import Base_tr
-
+from .base_tread import Base_tr
+import os
 
 class Create_fan_page_tr(Base_tr):
 

@@ -3,7 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from langdetect import detect
-from .base_tread import Base_tr
+from .base_tread_v2 import Base_tr
 import random
 
 class Create_bm_tr(Base_tr):
@@ -73,38 +73,43 @@ class Create_bm_tr(Base_tr):
 
     def run(self):
 
-        
-        if not self.check():
-            try:
-                self.driver.quit()
-            except:
-                pass
+        if not self.check_ip_data():
+            self.answer["status"] = "Ошибка"
+            self.answer["comment"] = "не удалось получить данные об IP"
             return
-
-        self.check_ip_data()
         # xpath = "//div[@data-click='profile_icon']//a/span/span"
         # elem = self.driver.find_element_by_xpath(xpath)
         # name = elem.text
 
-        self.driver.get("https://business.facebook.com/")
-
+        self.get_link("https://business.facebook.com/")
 
         xpath = "//a[@data-testid='business-create-account-button']"
-        if not self.click_to_xpath(xpath):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return
+        if not self.click_to_xpath(xpath, appointment="переход на страниу создания bm"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
+
 
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[2]"
-        elem = self.driver.find_element_by_xpath(xpath)
-        name = elem.get_attribute("value")
-        company_name = self.settings["tech_name"]+ " "+ name
+        elem = self.return_el_by_xpath(xpath)
+        if elem != None:
+            name = elem.get_attribute("value")
+            company_name = self.settings["tech_name"]+ " "+ name
+        else:
+            company_name = self.settings["tech_name"] + " ----"
+
 
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[1]"
-        if not self.set_text(xpath, company_name):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
+        if not self.set_text(xpath, company_name, appointment="название компании"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return
 
         # xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[2]"
         # if not self.set_text(xpath, name):
@@ -113,17 +118,22 @@ class Create_bm_tr(Base_tr):
         #     return (False)
 
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[3]"
-        if not self.set_text(xpath, self.settings["email"]):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
-
+        if not self.set_text(xpath, self.settings["email_f"], appointment="email"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return
 
         xpath = "//button[@class='_271k _271m _1qjd _7tvm _7tv2 _7tv4']"
-        if not self.click_to_xpath(xpath):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return
+        if not self.click_to_xpath(xpath, appointment="кнопка создания бм"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
 
         # xpath = "//button[@data-testid='SUISearchableSelector/button']"
         # if not self.click_to_xpath(xpath):
@@ -131,11 +141,13 @@ class Create_bm_tr(Base_tr):
         #     self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
         #     return
 
-
         xpath = "//div[@class='_43rm']"
-        elem = self.driver.find_element_by_xpath(xpath)
-        text = elem.text
-        qwes = detect(text)
+        elem = self.return_el_by_xpath(xpath)
+        if elem != None:
+            text = elem.text
+            qwes = detect(text)
+        else:
+            text = "----"
 
         if self.ip_settings["country"] == "RU":
 
@@ -176,18 +188,23 @@ class Create_bm_tr(Base_tr):
                 reg = "Kiev region"
 
         xpath = "//button[@data-testid='SUISearchableSelector/button']"
-        if not self.click_to_xpath(xpath):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return
+        if not self.click_to_xpath(xpath, appointment="еще одна кнопка"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
 
         xpath = "//input[@class='_58al']"
-        if not self.set_text(xpath, country):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
-
-        webdriver.ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+        if not self.set_text(xpath, country, appointment="страна"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+        else:
+            self.enter_click(xpath)
 
         # if self.ip_settings["country"] == "RU":
         #     country = "Russia"
@@ -200,10 +217,13 @@ class Create_bm_tr(Base_tr):
 
         street = streat[0]
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[1]"
-        if not self.set_text(xpath, street):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
+        if not self.set_text(xpath, street, appointment="улица"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return
 
         # xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[1]"
         # if not self.set_text(xpath, self.settings["address_f"]):
@@ -218,60 +238,84 @@ class Create_bm_tr(Base_tr):
         #     return (False)
 
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[3]"
-        if not self.set_text(xpath, city):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
+        if not self.set_text(xpath, city, appointment="город"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return
 
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[4]"
-        if not self.set_text(xpath, reg):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
+        if not self.set_text(xpath, reg, appointment="регион"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return
+
 
         postcode = f"0{random.randint(7000,9000)}"
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[5]"
-        if not self.set_text(xpath, postcode):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
+        if not self.set_text(xpath, postcode, appointment="postcode"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return
+
 
         ind = ["067","068","095","093","091","099"]
         random.shuffle(ind)
         ind = ind[0]
         phone_number =  f"+38{ind}{random.randint(1234567,9999999)}"
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[6]"
-        if not self.set_text(xpath, phone_number):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
+
+
+        if not self.set_text(xpath, phone_number, appointment="Номер телефона"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return
 
         site = ["na","mu","si","go","me","lo","we","ty","pi","po","pa","li","lo","ly"]
         random.shuffle(site)
         site = site[0:3]
         site = "".join(site)+".com"
 
-
         xpath = "(//input[@class='_4b7k _4b7k_big _53rs'])[7]"
-        if not self.set_text(xpath, site):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return (False)
+        if not self.set_text(xpath, site, appointment="Название сайта"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
 
         xpath = "//button[@class='_271k _271m _1qjd _7tvm _7tv2 _7tv4']"
-        if not self.click_to_xpath(xpath):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return
+        if not self.click_to_xpath(xpath, appointment="еще одна кнопка"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
 
         time.sleep(3)
 
         xpath = "//button[@class='_271k _271m _1qjd _7tvm _7tv2 _7tv4']"
-        if not self.click_to_xpath(xpath):
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-            return
+        if not self.click_to_xpath(xpath, appointment="еще одна кнопка"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
 
         self.answer["status"] = "Выполнен"
         self.answer["comment"] = "BM сдоздан"
-        self.driver.quit()
+

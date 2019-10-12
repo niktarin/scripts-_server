@@ -1,6 +1,7 @@
-from scripts.base_tread import Base_tr
+from .base_tread import Base_tr
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+import base64
 import time
 import os
 import requests
@@ -42,9 +43,9 @@ class Set_posts_tr(Base_tr):
             return(False)
 
     def set_post(self):
-
-        xpath = "//div[@data-testid='react-composer-root']"
-        if not self.click_to_xpath(xpath, circle=100, time_sleep=3):
+    	
+        xpath = "//div[@aria-label='Create a post'] "
+        if not self.click_to_xpath(xpath, circle=60, time_sleep=1):
             self.answer["comment"] = f"Время исчерпано не удалось найти {xpath}"
             self.answer["status"] = "Ошибка"
             return (False)
@@ -124,10 +125,10 @@ class Set_posts_tr(Base_tr):
 
     def to_fan_pages(self):
 
-        if "fan_pages_post" not in self.settings:
+        if "fan_pages" not in self.settings:
             return (True)
 
-        for fan_page in self.settings["fan_pages_post"]:
+        for fan_page in self.settings["fan_pages"]:
             fan_page.replace(" ", "")
             if fan_page == "":
                 continue
