@@ -15,7 +15,10 @@ class timer(Thread):
             for int_time in actions:
                 if int_time < time.time():
                     action = actions[int_time][0]
-                    action(actions[int_time][1])
+                    try:
+                        action(actions[int_time][1])
+                    except:
+                        pass
                     del self.actions[int_time]
             time.sleep(10)
 

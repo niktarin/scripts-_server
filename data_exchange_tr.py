@@ -31,7 +31,10 @@ class data_exchange_tr(Thread):
                 # else:
                 try:
                     respons = requests.post('http://arbcapsule.club/api/scenarios/script-result', json=answer)
+                    code = respons.status_code
                     self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
+                    self.log.log_append({"name": "server", "action": "respons_code", "text": code})
+
                 except:
                     self.log.log_append({"name": "server", "action": "return_answer", "text": "Не удалось вернуть ответ на сервер"})
                     continue
@@ -46,10 +49,12 @@ class data_exchange_tr(Thread):
                         my_object.driver_close()
                         my_object.status = "del"
                     else:
+                        self.log.log_append({"name": "server", "action": "get_scenaroi_prod", "text": serv_requests})
                         my_object.set_scenario(serv_requests)
                         my_object.status = "work"
                         my_object.start()
-
+                else:
+                    self.log.log_append({"name": "server", "action": "get_scenaroi_prod", "text": serv_requests})
     def del_obj(self):
         for index, my_object in enumerate(self.main_hab.main_objects):
             if my_object.status == "del":
@@ -61,10 +66,14 @@ class data_exchange_tr(Thread):
         except:
             self.log.log_append({"name":"server", "action":"get_scenaroi", "text": "Ошибка при обращении к серверу"})
             return False
-
-        scenario = answer.json()
-        if "error_message" in scenario:
+        try:
+            scenario = answer.json()
+        except:
+            self.log.log_append({"name": "server", "action": "get_scenaroi_error", "text": "Ошибка при попыке получить answer.json()"})
             return False
+
+        if "error_message" in scenario:
+            return
         else:
             self.log.log_append({"name":"server", "action":"get_scenaroi", "text": scenario})
             obj = main_obj(self.main_hab.log)

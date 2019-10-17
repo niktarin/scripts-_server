@@ -21,7 +21,7 @@ class main_hab():
         self.timer.start()
         self.data_exchange.start()
         # t = time.time()+100
-        t = time.time() + 3
+        # t = time.time() + 3
         # print(time.time())
         # print(t)
         # print(t+100)
@@ -29,9 +29,9 @@ class main_hab():
         # self.timer.add_action(time=t+20,command = self.ml_control.restart_ml)
         # self.timer.add_action(time=t+30,command = self.ml_control.close_ml)
 
-def start():
-    main_hab = main_hab()
-    main_hab.start()
+# def start():
+#     main_hab = main_hab()
+#     main_hab.start()
 
 main_hab = main_hab()
 main_hab.start()

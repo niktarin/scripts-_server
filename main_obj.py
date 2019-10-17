@@ -6,7 +6,8 @@ from selenium.webdriver.remote.command import Command
 from scripts_v2.simple_update import Simple_update_fb
 from scripts_v2.сreate_fan_page import Create_fan_page
 from scripts_v2.create_BM import Create_bm_tr
-# from scripts_v2.set_posts import Set_posts_tr
+from scripts.set_posts import Set_posts_tr
+from scripts.add_friends import Add_friends_tr
 # from scripts_v2.check_fb import Check_fb
 # from scripts_v2.сreate_fan_page import Create_fan_page_tr
 from scripts_v2.registr_fb import Registr_fb_tr
@@ -99,7 +100,7 @@ class main_obj:
                     self.add_driver_comment = "Прокси не активен"
                     return False
 
-            self.add_driver_comment = f"Не удалось запустить аккаунт ({self.ml_answear})"
+            self.add_driver_comment = f"Не удалось запустить аккаунт в Мультилогине причина не известна"
             return False
 
         else:
@@ -128,11 +129,12 @@ class main_obj:
 
         elif type_scenario == "fb_create_bm":
             tread = Create_bm_tr(scenario, self.log)
-        # elif type_scenario == "check_fb":
-        #     tread = Check_fb(scenario)
+
+        elif type_scenario == "fb_friends":
+            tread = Add_friends_tr(scenario)
         #
-        # elif type_scenario == "create_post":
-        #     tread = Set_posts_tr(scenario)
+        elif type_scenario == "create_post":
+            tread = Set_posts_tr(scenario)
         #
         elif type_scenario == "create_fanpage":
             tread = Create_fan_page(scenario, self.log)
@@ -204,7 +206,7 @@ class main_obj:
                 return
 
         if not self.add_scenario_tread():
-            self.ans_obj.status = "Ошибка сервера"
+            self.ans_obj.status = "Ошибка"
             self.ans_obj.comment = self.add_scenario_comment
             self.log.log_append({"name": self.tech_name, "action": "obj", "text": self.add_scenario_comment})
             self.obj_live = False
@@ -212,7 +214,7 @@ class main_obj:
             return
 
         if not self.start_tread():
-            self.ans_obj.status = "Ошибка сервера"
+            self.ans_obj.status = "Ошибка"
             self.ans_obj.comment = "Не удалось запустить поток"
             self.log.log_append({"name": self.tech_name, "action": "obj", "text": "Не удалось запустить поток"})
             self.obj_live = False

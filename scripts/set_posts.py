@@ -164,12 +164,6 @@ class Set_posts_tr(Base_tr):
 
     def run(self):
 
-        if not self.check():
-            try:
-                self.driver.quit()
-            except:
-                pass
-            return
 
         if not self.get_files():
             self.answer["comment"] = "Не удалось получить данные для поста"
@@ -195,4 +189,3 @@ class Set_posts_tr(Base_tr):
         self.answer["comment"] = "Пост сделан"
         self.answer["status"] = "Выполнен"
 
-        self.driver.quit()

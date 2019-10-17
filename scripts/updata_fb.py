@@ -4,7 +4,6 @@ from .base_tread import Base_tr
 import random
 import time
 
-
 class Updata_fb_tr(Base_tr):
 
     def start_page_scroll(self):

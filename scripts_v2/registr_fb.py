@@ -334,25 +334,20 @@ class Registr_fb_tr(Base_tr):
         return True
 
     def load_face(self):
-        self.get_link("https://www.facebook.com/profile.php")
+
         self.click_esc()
-        self.scroll_page_up(15)
-        if "face_picture_href" in self.settings and self.settings["face_picture_href"] != False:
-            self.scroll_page_up(10)
-            self.face_picture = f".\\img\\face_picture_{self.settings['id_scenarios']}.jpg"
-            self.face_picture_href = self.settings["face_picture_href"]
+        self.scroll_page_up(10)
 
-            try:
-                os.remove(self.face_picture)
-            except:
-                pass
+        if "face_picture_href" in self.settings:
 
-            p = requests.get(self.face_picture_href)
-            out = open(self.face_picture, "wb")
-            out.write(p.content)
-            out.close()
+            href = self.settings["face_picture_href"]
+            pictur_name = self.load_img(href=href)
+            if not pictur_name:
+                self.answer["status"] = "Ошибка"
+                self.answer["comment"] = "Не удалось загрузить картинку(битая ссылка/проблеммы со связью)"
+                return False
 
-            xpath = "//div[contains(@class, 'fbTimelineProfilePicSelector')]"
+            xpath = "//div[contains(@class ='fbTimelineProfilePicSelector')]"
             if not self.click_to_xpath(xpath, appointment="нажать на меню для заливки фото"):
                 self.log.log_append({"name": self.tech_name, "action": "action", "text": "клик "})
                 return False
@@ -360,14 +355,14 @@ class Registr_fb_tr(Base_tr):
             xpath = "//a[@class='_3cia']/div[@class='_3jk']/input[@type='file']"
             elem = self.return_el_by_xpath(xpath)
             if elem != None:
-                elem.send_keys(self.face_picture)
+                elem.send_keys(pictur_name)
                 self.log.log_append({"name": self.tech_name, "action": "action", "text": "фото залито"})
             else:
                 self.log.log_append({"name": self.tech_name, "action": "action", "text": "не удалось залить фото"})
                 return False
 
             try:
-                os.remove(self.face_picture)
+                os.remove(pictur_name)
             except:
                 pass
 
@@ -381,22 +376,16 @@ class Registr_fb_tr(Base_tr):
             return False
 
     def load_caver(self):
-        self.get_link("https://www.facebook.com/profile.php")
-
         self.click_esc()
-        self.scroll_page_up(15)
-        if "cover_picture_href" in self.settings and self.settings["cover_picture_href"] != False:
-            self.cover_picture = f".\\img\\cover_picture_{self.settings['id_scenarios']}.jpg"
-            self.cover_picture_href = self.settings["cover_picture_href"]
-            try:
-                os.remove(self.cover_picture)
-            except:
-                pass
+        self.scroll_page_up(10)
+        if "cover_picture_href" in self.settings:
 
-            p = requests.get(self.cover_picture_href)
-            out = open(self.cover_picture, "wb")
-            out.write(p.content)
-            out.close()
+            href = self.settings["cover_picture_href"]
+            pictur_name = self.load_img(href=href)
+            if not pictur_name:
+                self.answer["status"] = "Ошибка"
+                self.answer["comment"] = "Не удалось загрузить картинку(битая ссылка/проблеммы со связью)"
+                return False
 
             xpath = "//div[@id='fbProfileCoverPhotoSelector']"
             element_to_hover_over = self.return_el_by_xpath(xpath)
@@ -411,10 +400,10 @@ class Registr_fb_tr(Base_tr):
             xpath = "//label//div[@class='_3jk']//input"
             element = self.return_el_by_xpath(xpath)
             if element != None:
-                element.send_keys(self.cover_picture)
+                element.send_keys(pictur_name)
 
             try:
-                os.remove(self.cover_picture)
+                os.remove(pictur_name)
             except:
                 pass
 
@@ -427,100 +416,6 @@ class Registr_fb_tr(Base_tr):
         else:
             return False
 
-    def load_img(self):
-        # xpath = "(//div[@class='linkWrap noCount'])[1]"
-        # if not self.click_to_xpath(xpath):
-        #     self.answer["status"] = "Ошибка"
-        #     self.answer["comment"] = f"Время исчерпано, не удалось найти {xpath}"
-        #     return (False)
-        self.click_esc()
-        self.scroll_page_up(15)
-        if "face_picture_href" in self.settings and self.settings["face_picture_href"] != False:
-            self.scroll_page_up(10)
-            self.face_picture = f"..img\\face_picture_{self.settings['id_scenarios']}.jpg"
-            self.face_picture_href = self.settings["face_picture_href"]
-            try:
-                os.remove(self.face_picture)
-            except:
-                pass
-            p = requests.get(self.face_picture_href)
-            out = open(self.face_picture, "wb")
-            out.write(p.content)
-            out.close()
-
-            xpath = "//div[contains(@class, 'fbTimelineProfilePicSelector')]"
-            if not self.click_to_xpath(xpath):
-                return (False)
-
-            for i in range(40):
-                try:
-                    elem = self.driver.find_element_by_xpath(
-                        "//a[@class='_3cia']/div[@class='_3jk']/input[@type='file']")
-                    elem.send_keys(self.face_picture)
-                    break
-                except:
-                    time.sleep(1)
-
-            time.sleep(10)
-
-            xpath = "//button[@data-testid='profilePicSaveButton']"
-            if not self.click_to_xpath(xpath):
-                return False
-
-            try:
-                os.remove(self.face_picture)
-            except:
-                pass
-
-            time.sleep(5)
-            for i in range(3):
-                webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-                time.sleep(1)
-
-            self.scroll_page_up(15)
-        else:
-            self.face_picture = None
-
-        if "cover_picture_href" in self.settings and self.settings["cover_picture_href"] != False:
-            self.cover_picture = f"..img\\cover_picture_{self.settings['id_scenarios']}.jpg"
-            self.cover_picture_href = self.settings["cover_picture_href"]
-            try:
-                os.remove(self.cover_picture)
-            except:
-                pass
-
-            p = requests.get(self.cover_picture_href)
-            out = open(self.cover_picture, "wb")
-            out.write(p.content)
-            out.close()
-
-            xpath = "//div[@id='fbProfileCoverPhotoSelector']"
-            element_to_hover_over = self.driver.find_element_by_xpath(xpath)
-            hover = ActionChains(self.driver).move_to_element(element_to_hover_over)
-            hover.perform()
-
-            if not self.click_to_xpath(xpath):
-                return (False)
-
-            time.sleep(3)
-            elem = self.driver.find_element_by_xpath("//label//div[@class='_3jk']//input")
-            elem.send_keys(self.cover_picture)
-            time.sleep(10)
-
-            xpath = "//button[@name='save']"
-            if not self.click_to_xpath(xpath):
-                return (False)
-
-            try:
-                os.remove(self.cover_picture)
-            except:
-                pass
-
-        else:
-            self.cover_picture = None
-
-        return
-
     def login_mail(self):
         type_mail = self.settings["email_f"].split("@")[1]
 
@@ -530,7 +425,8 @@ class Registr_fb_tr(Base_tr):
                 "https://login.yahoo.com/config/login?.src=fpctx&.intl=us&.lang=en-US&.done=https%3A%2F%2Fwww.yahoo.com")
 
             xpath = "//input[@id='login-username']"
-            if not self.set_text(xpath, self.settings["email_f"],time_wait=5, appointment="заполнение поля 'email' входа в почту"):
+            if not self.set_text(xpath, self.settings["email_f"], time_wait=5,
+                                 appointment="заполнение поля 'email' входа в почту"):
                 if self.accaunt_block_flag:
                     self.answer["status"] = "Ошибка"
                 else:
@@ -574,7 +470,7 @@ class Registr_fb_tr(Base_tr):
             if not self.driver.current_url in u:
 
                 xpath = "//div[@id='profileIdentifier']"
-                if self.check_xpath(xpath,time_wait=3):
+                if self.check_xpath(xpath, time_wait=3):
                     xpath = "//input[@name='password']"
                     if not self.set_text(xpath, self.settings["email_password"],
                                          appointment="заполнение поля 'password' входа в почту"):
@@ -662,7 +558,7 @@ class Registr_fb_tr(Base_tr):
             self.get_link("https://mail.yahoo.com")
 
             xpath = "//button[@data-test-id='themes-cue-close']"
-            if not self.click_to_xpath(xpath,time_wait=5, appointment="закрыть какоето сообщение на почте"):
+            if not self.click_to_xpath(xpath, time_wait=5, appointment="закрыть какоето сообщение на почте"):
                 if self.accaunt_block_flag:
                     self.answer["status"] = "Ошибка"
                 else:
@@ -674,7 +570,7 @@ class Registr_fb_tr(Base_tr):
             if self.click_to_xpath(xpath, appointment="поиск песьма"):
 
                 xpath = "//table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td[3]/a"
-                if  self.click_to_xpath(xpath, appointment="переход оп ссылке в письме"):
+                if self.click_to_xpath(xpath, appointment="переход оп ссылке в письме"):
                     return True
                 else:
                     return False
@@ -687,10 +583,10 @@ class Registr_fb_tr(Base_tr):
             self.driver.get("https://mail.google.com")
 
             xpath = "//button[@name='welcome_dialog_next']"
-            self.click_to_xpath(xpath,time_wait=5)
+            self.click_to_xpath(xpath, time_wait=5)
 
             xpath = "//button[@name='ok']"
-            self.click_to_xpath(xpath,time_wait=5)
+            self.click_to_xpath(xpath, time_wait=5)
 
             xpath = "(//span[@email='registration@facebookmail.com'])[position() = last()]/../../.."
             if self.click_to_xpath(xpath, appointment="поиск песьма"):
@@ -866,39 +762,32 @@ class Registr_fb_tr(Base_tr):
                 self.click_to_xpath(xpath)
 
     def add_groups(self):
-        try:
-            time.sleep(3)
-            self.driver.switch_to_window(self.driver.window_handles[1])
-            time.sleep(3)
-            self.driver.refresh()
-        except:
-            return
-
-        self.window_handles_go(1)
-        time.sleep(3)
-        self.driver.refresh()
+        # time.sleep(10)
+        # self.window_handles_go(1)
+        time.sleep(5)
+        # self.driver.refresh()
+        # self.get_link("")
 
         if self.country == "RU":
-            file_groups = "..\\data\\RU group.txt"
+            file_groups = ".\\data\\RU group.txt"
 
         elif self.country == "UA":
-            file_groups = "..\\data\\UA group.txt"
+            file_groups = ".\\data\\UA group.txt"
 
         else:
-            file_groups = "..\\data\\general.txt"
+            file_groups = ".\\data\\general.txt"
 
         links = []
         try:
             f = open(file_groups, "r")
         except:
-            self.log.log_append({"name": self.tech_name, "action": "load_file", "text": "не удалось загрузить файл с группами"})
-
+            self.log.log_append(
+                {"name": self.tech_name, "action": "load_file", "text": "не удалось загрузить файл с группами"})
             return False
 
         for link in f:
             if link == "\n":
                 continue
-
             links.append(link.replace("\n", ""))
 
         random.shuffle(links)
@@ -906,18 +795,13 @@ class Registr_fb_tr(Base_tr):
         for i in range(2):
             link = links[i]
             self.driver.get(link)
-
-            for j in range(3):
-                webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-                time.sleep(1)
-
+            time.sleep(5)
+            self.click_esc()
             xpath = "//button[@data-testid='page_profile_like_button_test_id']"
             self.click_to_xpath(xpath)
 
     def run(self):
         # try:
-            self.cover_picture = None
-            self.face_picture = None
             confirm_email_flag = False
             email_comment = ""
 
@@ -940,35 +824,21 @@ class Registr_fb_tr(Base_tr):
                 self.answer["comment"] = ans
                 return
 
+            self.click_esc()
             xpath = "//span[@class='_2md']"
-            if self.find_xpath(xpath, time_wait=5) and not "www.facebook.com/confirmemail.php" in self.driver.current_url:
-                self.answer["status"] = "Ошибка"
-                self.answer["comment"] = f"Аккаунт уже зарегистрированн"
-                return
-
+            if self.find_xpath(xpath, time_wait=5):
+                if not "www.facebook.com/confirmemail.php" in self.driver.current_url:
+                    self.answer["status"] = "Ошибка"
+                    self.answer["comment"] = f"Аккаунт уже зарегистрированн"
+                    return
             else:
                 self.log.log_append(
                     {"name": self.tech_name, "action": "check", "text": "аккаун не залогинен/зарегистрированн"})
                 if not self.form_filling():
                     return
-
-            time.sleep(5)
             self.click_esc()
-
-            flag, ans = self.check_block()
-            if not flag:
-                self.answer["status"] = "Ошибка"
-                self.answer["comment"] = ans
-                return
-
-            xpath = "//span[@class='_2md']"
-            if self.find_xpath(xpath, time_wait=5) and not "www.facebook.com/confirmemail.php" in self.driver.current_url:
-                self.answer["status"] = "Ошибка"
-                self.answer["comment"] = f"Аккаунт уже зарегистрированн"
-                return
-
             xpath = "//*[@id='bluebar_profile_and_home']/div/div/a"
-            if not self.click_to_xpath(xpath,time_wait=10):
+            if not self.click_to_xpath(xpath, time_wait=10):
                 if self.confirm_email():
                     confirm_email_flag = True
                     email_comment = "почта подтверждена"
@@ -1000,6 +870,7 @@ class Registr_fb_tr(Base_tr):
             self.answer["status"] = "Выполнен"
             self.answer["comment"] = f"Аккаунт зарегистрирован в фб {email_comment, face_picture, cover_picture}"
         # except:
-        #     self.log.log_append({"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
+        #     self.log.log_append(
+        #         {"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
         #     self.answer["status"] = "Ошибка"
         #     self.answer["comment"] = "Не предвиденная ошибка потока сценария"

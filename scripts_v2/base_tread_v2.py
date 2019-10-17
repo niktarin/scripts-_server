@@ -3,6 +3,8 @@ from selenium.webdriver.common.keys import Keys
 from threading import Thread
 import time
 import json
+import random
+import requests
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -255,7 +257,10 @@ class Base_tr(Thread):
 
         html = self.driver.find_element_by_tag_name('html')
         for i in range(up):
-            html.send_keys(Keys.UP)
+            try:
+                html.send_keys(Keys.UP)
+            except:
+                pass
             time.sleep(time_sleep)
 
         self.log.log_append(
@@ -421,3 +426,37 @@ class Base_tr(Thread):
                 self.click_to_xpath(xpath)
 
         return (True)
+
+    def load_img(self, href, img_name=None, appointment=None, action="load_img", circle=3, time_wait=5):
+        if img_name == None:
+            img_name = f".\\img\\load_img_{random.randint(123456789,999999999)}.jpg"
+
+        try:
+            os.remove(img_name)
+        except:
+            pass
+
+        for i in range(circle):
+            try:
+                p = requests.get(href)
+            except:
+                time.sleep(time_wait)
+                continue
+
+            out = open(img_name, "wb")
+            out.write(p.content)
+            out.close()
+
+
+            self.log.log_append(
+                {"name": self.tech_name, "action": action, "text": f"{appointment}/ скачана картинка {href}"})
+            return img_name
+
+        self.log.log_append(
+            {"name": self.tech_name, "action": action, "text": f"{appointment}/ НЕ скачана картинка {href}"})
+        return False
+
+
+
+
+
