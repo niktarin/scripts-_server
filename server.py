@@ -7,7 +7,7 @@ from ml_control_obj import ml_control
 
 class main_hab():
     main_objects = []
-    max_tread = 2
+    max_tread = 1
 
     def __init__(self):
         self.log = log()

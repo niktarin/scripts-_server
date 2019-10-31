@@ -25,7 +25,6 @@ class Updata_fb_tr(Base_tr):
         if not self.start_page_scroll():
             return (False)
 
-
         try:
             xpath = "//span[@class='_1mto']/div[@class='_khz _4sz1 _4rw5 _3wv2']/a"
             elements_1 = self.driver.find_elements_by_xpath(xpath)
@@ -63,7 +62,7 @@ class Updata_fb_tr(Base_tr):
                     del elements[0]
                     continue
 
-            return (True)
+            return True
 
         except:
             self.answear["status"] = "Ошибка"

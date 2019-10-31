@@ -347,7 +347,7 @@ class Registr_fb_tr(Base_tr):
                 self.answer["comment"] = "Не удалось загрузить картинку(битая ссылка/проблеммы со связью)"
                 return False
 
-            xpath = "//div[contains(@class ='fbTimelineProfilePicSelector')]"
+            xpath = "//div[contains(concat(' ',@class,' '),' fbTimelineProfilePicSelector')]"
             if not self.click_to_xpath(xpath, appointment="нажать на меню для заливки фото"):
                 self.log.log_append({"name": self.tech_name, "action": "action", "text": "клик "})
                 return False
@@ -367,7 +367,7 @@ class Registr_fb_tr(Base_tr):
                 pass
 
             xpath = "//button[@data-testid='profilePicSaveButton']"
-            if not self.click_to_xpath(xpath, appointment="кнопка сохранения изменений"):
+            if not self.click_to_xpath(xpath, time_wait=60, appointment="кнопка сохранения изменений"):
                 return False
             else:
                 return True
@@ -408,7 +408,7 @@ class Registr_fb_tr(Base_tr):
                 pass
 
             xpath = "//button[@name='save']"
-            if not self.click_to_xpath(xpath, appointment="кнопка сохранения изменений"):
+            if not self.click_to_xpath(xpath, time_wait=60,appointment="кнопка сохранения изменений"):
                 return False
             else:
                 self.log.log_append({"name": self.tech_name, "action": "action", "text": "кавер залито"})
@@ -526,7 +526,13 @@ class Registr_fb_tr(Base_tr):
 
             self.window_handles_go(0)
 
-            time.sleep(5)
+            time.sleep(3)
+            text = "myaccount.google.com/signinoptions/recovery-options-collection"
+            if self.check_text_in_link(text=text, circle=7):
+                xpath = "//span[text()='Done']"
+                self.click_to_xpath(xpath)
+
+            time.sleep(3)
             text = "accounts.google.com/signin/newfeatures"
             if self.check_text_in_link(text=text):
                 url = "accounts.google.com/signin/newfeatures"
@@ -539,7 +545,7 @@ class Registr_fb_tr(Base_tr):
                     xpath = "//div[@class='U26fgb O0WRkf zZhnYe e3Duub C0oVfc WVqvne ioikHf TMcGbb']"
                     self.click_to_xpath(xpath)
 
-            time.sleep(5)
+            time.sleep(3)
 
             if not self.driver.current_url in u:
                 return False
@@ -577,11 +583,10 @@ class Registr_fb_tr(Base_tr):
             else:
                 return False
 
-
         elif type_mail == "gmail.com":
 
             self.driver.get("https://mail.google.com")
-
+            time.sleep(10)
             xpath = "//button[@name='welcome_dialog_next']"
             self.click_to_xpath(xpath, time_wait=5)
 
@@ -801,7 +806,7 @@ class Registr_fb_tr(Base_tr):
             self.click_to_xpath(xpath)
 
     def run(self):
-        # try:
+        try:
             confirm_email_flag = False
             email_comment = ""
 
@@ -869,8 +874,8 @@ class Registr_fb_tr(Base_tr):
 
             self.answer["status"] = "Выполнен"
             self.answer["comment"] = f"Аккаунт зарегистрирован в фб {email_comment, face_picture, cover_picture}"
-        # except:
-        #     self.log.log_append(
-        #         {"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
-        #     self.answer["status"] = "Ошибка"
-        #     self.answer["comment"] = "Не предвиденная ошибка потока сценария"
+        except:
+            self.log.log_append(
+                {"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
+            self.answer["status"] = "Ошибка"
+            self.answer["comment"] = "Не предвиденная ошибка потока сценария"

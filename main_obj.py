@@ -8,9 +8,12 @@ from scripts_v2.сreate_fan_page import Create_fan_page
 from scripts_v2.create_BM import Create_bm_tr
 from scripts.set_posts import Set_posts_tr
 from scripts.add_friends import Add_friends_tr
+from scripts_v2.updata_fb import Updata_fb_tr
 # from scripts_v2.check_fb import Check_fb
 # from scripts_v2.сreate_fan_page import Create_fan_page_tr
 from scripts_v2.registr_fb import Registr_fb_tr
+
+
 # from scripts_v2.load_img import load_img_tr
 
 class answer:
@@ -35,7 +38,7 @@ class answer:
 
 class main_obj:
 
-    def __init__(self, log):
+    def __init__(self, main_hab):
         self.settings = None
         self.driver = None
         self.id_scenarios = None
@@ -48,7 +51,8 @@ class main_obj:
         self.ml_answear = None
         self.tr_answear = None
         self.obj_live = True
-        self.log = log
+        self.log = main_hab.log
+        self.main_hab = main_hab
         self.status = "work"
         self.output_data = {}
         self.ans_obj = answer()
@@ -104,10 +108,14 @@ class main_obj:
             return False
 
         else:
-            self.driver = webdriver.Remote(command_executor=self.ml_answear['value'])
-            time.sleep(5)
-            self.add_driver_comment = "Аккаунт запущен"
-            return True
+            try:
+                self.driver = webdriver.Remote(command_executor=self.ml_answear['value'])
+                time.sleep(5)
+                self.add_driver_comment = "Аккаунт запущен"
+                return True
+            except:
+                self.add_driver_comment = "Ошибка мультиллогина при попытки запустить браузер"
+                return False
 
     def set_scenario(self, scenario_settings):
         self.settings = scenario_settings
@@ -115,7 +123,7 @@ class main_obj:
         self.id_scenarios = scenario_settings["id_scenarios"]
         self.type_scenario = scenario_settings["type_scenario"]
         self.ans_obj.set_scenario(scenario_settings)
-        self.log.log_append({"name":self.tech_name, "action": "set_scenario", "text": scenario_settings})
+        self.log.log_append({"name": self.tech_name, "action": "set_scenario", "text": scenario_settings})
 
     def add_scenario_tread(self):
         scenario = self.settings
@@ -144,6 +152,9 @@ class main_obj:
         #
         # elif type_scenario == "fb_photo_update":
         #     tread = load_img_tr(scenario)
+
+        elif type_scenario == "fb_surfing":
+            tread = Updata_fb_tr(scenario, self.log)
         else:
             self.add_scenario_comment = "Не удалось определить сценарий"
             return False
@@ -155,6 +166,10 @@ class main_obj:
     def start_tread(self):
         if self.tread != None:
             self.tread.driver = self.driver
+            if "time" in self.settings:
+                self.tread.flag_work = True
+                second = time.time() + int(self.settings["time"]) * 60
+                self.main_hab.timer.add_action(time=second, command=self.tread.stop, commands="")
             self.tread.start()
             self.time_start = time.time()
             return True
@@ -165,16 +180,18 @@ class main_obj:
         if self.tread.is_alive():
             self.status = "work"
         else:
-            self.log.log_append({"name": self.tech_name, "action": "status", "text": f"Сценарий {self.tech_name} (id {self.id_scenarios}) завершон"})
+            self.log.log_append({"name": self.tech_name, "action": "status",
+                                 "text": f"Сценарий {self.tech_name} (id {self.id_scenarios}) завершон"})
+            self.time_stop =  time.time()
             self.status = "compleat"
-            
+
     def driver_check(self):
         try:
             self.driver.execute(Command.STATUS)
             return False
         except:
             return True
-            
+
     def get_answer(self):
         if self.obj_live:
             if not self.tread.is_alive():
@@ -182,9 +199,10 @@ class main_obj:
                 self.ans_obj.comment = self.tread.answer["comment"]
                 self.ans_obj.status = self.tread.answer["status"]
 
-                time_work = time.time() - self.time_start
-                m = round((time_work/60),1)
-                self.log.log_append({"name": "server", "action": "time", "text": f"врем работы {self.type_scenario} ~ {m} минут"})
+                time_work = self.time_stop - self.time_start
+                m = round((time_work / 60), 1)
+                self.log.log_append(
+                    {"name": "server", "action": "time", "text": f"врем работы {self.type_scenario} ~ {m} минут"})
 
                 if self.ans_obj.status == "Ошибка сервера" or self.ans_obj.status == "Ошибка":
                     path = self.screenshot_page()
@@ -232,4 +250,5 @@ class main_obj:
         except:
             pass
 
-        self.log.log_append({"name": self.tech_name, "action": "driver_close", "text": f"Драйвер {self.tech_name} закрыт"})
+        self.log.log_append(
+            {"name": self.tech_name, "action": "driver_close", "text": f"Драйвер {self.tech_name} закрыт"})

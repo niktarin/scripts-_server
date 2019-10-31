@@ -266,16 +266,6 @@ class Base_tr(Thread):
 
     def check(self):
 
-        answer = self.connect_to_multilogin()
-        if not answer["answer"]:
-            self.answer["status"] = "Ошибка"
-            self.answer["comment"] = answer["comment"]
-            try:
-                self.driver.quit()
-            except:
-                pass
-            return (False)
-
         self.to_start_page()
 
         if not self.check_block():

@@ -317,18 +317,36 @@ class Create_bm_tr(Base_tr):
 
             time.sleep(3)
 
-            # xpath = "//button[@class='_271k _271m _1qjd _7tvm _7tv2 _7tv4']"
-            # if not self.click_to_xpath(xpath, appointment="еще одна кнопка"):
-            #     if self.accaunt_block_flag:
-            #         self.answer["status"] = "Ошибка"
-            #     else:
-            #         self.answer["status"] = "Ошибка сервера"
-            #     self.answer["comment"] = self.error_comment
-            #     return False
+            xpath = "//button[@class='_271k _271m _1qjd _7tvm _7tv2 _7tv4']"
+            if not self.click_to_xpath(xpath, appointment="еще одна кнопка"):
+                if self.accaunt_block_flag:
+                    self.answer["status"] = "Ошибка"
+                else:
+                    self.answer["status"] = "Ошибка сервера"
+                self.answer["comment"] = self.error_comment
+                return False
+            time.sleep(60)
 
 
-            self.answer["status"] = "Выполнен"
-            self.answer["comment"] = "BM сдоздан"
+            link = "https://www.facebook.com/"
+            self.get_link(link)
+
+            xpath = "//div[@id='userNavigationLabel']"
+            if not self.click_to_xpath(xpath, appointment="еще одна кнопка"):
+                if self.accaunt_block_flag:
+                    self.answer["status"] = "Ошибка"
+                else:
+                    self.answer["status"] = "Ошибка сервера"
+                self.answer["comment"] = self.error_comment
+                return False
+
+            xpath = f"//div[@class='navSubmenuName ellipsis' and text()='{company_name}']"
+            if self.find_xpath(xpath,time_wait=60):
+                self.answer["status"] = "Выполнен"
+                self.answer["comment"] = "BM сдоздан"
+            else:
+                self.answer["status"] = "Ошибка"
+                self.answer["comment"] = "BM НЕ сдоздан"
         except:
             self.log.log_append({"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
             self.answer["status"] = "Ошибка"

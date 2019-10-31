@@ -2,7 +2,6 @@ from scripts_v2.base_tread_v2 import Base_tr
 import random
 import time
 
-
 class Simple_update_fb(Base_tr):
 
     def my_page_scroll(self):
@@ -102,6 +101,60 @@ class Simple_update_fb(Base_tr):
             self.driver.refresh()
             time.sleep(t)
 
+    def to_self_page(self):
+        xpath = "//span[@class='_2md']"
+        if not self.click_to_xpath(xpath, appointment="переход на личную страницу"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
+
+        xpath = "(//div[@class='linkWrap noCount'])[1]"
+        if not self.click_to_xpath(xpath, appointment="Переход на личную страницу"):
+            if self.accaunt_block_flag:
+                self.answer["status"] = "Ошибка"
+            else:
+                self.answer["status"] = "Ошибка сервера"
+            self.answer["comment"] = self.error_comment
+            return False
+
+        self.scroll_page_down(150, appointment="Скролл вних")
+        return True
+
+    def check_data(self):
+        self.flag_qwestion = None
+        self.flag_cover_photo = None
+        self.flag_profile_picture = None
+
+        flag = True
+        xpath = "((//div[@id='profile_timeline_info_review']/li/div/div/div/div)[2]/div)[1]"
+        if self.find_xpath(xpath):
+            self.flag_qwestion = "остались"
+            flag = False
+        else:
+            self.flag_qwestion = "не остались"
+
+
+        if self.find_xpath("//span[text()=' updated her cover photo.']"):
+            self.flag_cover_photo = "залит"
+        elif self.find_xpath("//span[text()=' обновила фото обложки.']"):
+            self.flag_cover_photo = "залит"
+        else:
+            self.flag_cover_photo = "не залит"
+            flag = False
+
+        if self.find_xpath("//span[text()=' updated her profile picture.']") :
+            self.flag_profile_picture =  "залит"
+        elif self.find_xpath("//span[text()=' обновила фото профиля.']"):
+            self.flag_cover_photo = "залит"
+        else:
+            self.flag_profile_picture = "не залит"
+            flag = False
+
+        return flag
+
     def run(self):
         try:
             if not self.check():
@@ -119,8 +172,17 @@ class Simple_update_fb(Base_tr):
                     return
                 self.refresh()
 
-            self.answer["comment"] = "Пустое обновление прошло успешно"
-            self.answer["status"] = "Выполнен"
+            if not self.to_self_page():
+                return
+
+            if self.check_data():
+                status = "Выполнен"
+            else:
+                # status = "Ошибка"
+                status = "Выполнен"
+
+            self.answer["comment"] = f"Кавер:{self.flag_cover_photo} \n Фейс:{self.flag_profile_picture} Вопросы:{self.flag_qwestion}"
+            self.answer["status"] = status
         except:
             self.log.log_append({"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
             self.answer["status"] = "Ошибка"

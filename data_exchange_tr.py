@@ -32,6 +32,7 @@ class data_exchange_tr(Thread):
                 try:
                     respons = requests.post('http://arbcapsule.club/api/scenarios/script-result', json=answer)
                     code = respons.status_code
+                    # code = 200
                     self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
                     self.log.log_append({"name": "server", "action": "respons_code", "text": code})
 
@@ -39,9 +40,6 @@ class data_exchange_tr(Thread):
                     self.log.log_append({"name": "server", "action": "return_answer", "text": "Не удалось вернуть ответ на сервер"})
                     continue
 
-                code = respons.status_code
-                # my_object.driver_close()
-                # my_object.status = "del"
                 if code == 200:
                     serv_requests = respons.json()
 
@@ -55,6 +53,7 @@ class data_exchange_tr(Thread):
                         my_object.start()
                 else:
                     self.log.log_append({"name": "server", "action": "get_scenaroi_prod", "text": serv_requests})
+
     def del_obj(self):
         for index, my_object in enumerate(self.main_hab.main_objects):
             if my_object.status == "del":
@@ -71,13 +70,12 @@ class data_exchange_tr(Thread):
         except:
             self.log.log_append({"name": "server", "action": "get_scenaroi_error", "text": "Ошибка при попыке получить answer.json()"})
             return False
-
+        # scenario = {'id_scenarios': 9980, 'type_scenario': 'fb_surfing', 'tech_name': '800', 'ml_token': 'b18024d0-2bb1-47f6-8397-4e349b189ec8', 'email_f': 'inessavelikanova873@gmail.com', 'fb_password': 'p52Hm8i9SdLY56Yd', 'likes_min': '2', 'likes_max': '3', 'repost_min': '1', 'repost_max': '2', 'time': '5'}
         if "error_message" in scenario:
             return
         else:
             self.log.log_append({"name":"server", "action":"get_scenaroi", "text": scenario})
-            obj = main_obj(self.main_hab.log)
-            obj.log = self.main_hab.log
+            obj = main_obj(main_hab = self.main_hab)
             obj.set_scenario(scenario)
             obj.start()
             self.main_hab.main_objects.append(obj)
@@ -106,8 +104,8 @@ class data_exchange_tr(Thread):
                 time.sleep(self.wait_time)
                 continue
 
-            if not self.get_scenaroi():
-                time.sleep(self.wait_time)
+            self.get_scenaroi()
+            time.sleep(self.wait_time)
 
 
 

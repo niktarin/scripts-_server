@@ -688,7 +688,6 @@ class Registr_fb_tr(Base_tr):
                                 "student",
                                 "retired"]}
 
-
         ru_ans = {
                     "which city do you live in?": ["Moscow Russia Moscow"],
                     "what city are you from?":["Moscow Russia Moscow"],
@@ -741,8 +740,6 @@ class Registr_fb_tr(Base_tr):
             ans = ua_ans
         else :
             ans = ru_ans
-
-
 
         for i in range(5):
             time.sleep(5)

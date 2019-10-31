@@ -50,7 +50,6 @@ class Set_posts_tr(Base_tr):
             self.answer["status"] = "Ошибка"
             return (False)
 
-        
 
         circle = 0
         while True:
@@ -163,7 +162,8 @@ class Set_posts_tr(Base_tr):
         return (self.set_post())
 
     def run(self):
-
+        if not self.check():
+            return
 
         if not self.get_files():
             self.answer["comment"] = "Не удалось получить данные для поста"
@@ -173,7 +173,6 @@ class Set_posts_tr(Base_tr):
 
         for i in range(4):
             webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-
 
         if "start_page" in  self.settings:
             if self.settings["start_page"]:
