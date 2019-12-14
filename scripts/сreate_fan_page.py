@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
 class Create_fan_page_tr(Base_tr):
 
     def run(self):
@@ -57,18 +58,15 @@ class Create_fan_page_tr(Base_tr):
 
         time.sleep(10)
 
-        
         try:
             xpath = "//div[@class='_29dy']"
             element = self.driver.find_element_by_xpath(xpath)
             if element.is_displayed():
                 self.answer["status"] = "Ошибка"
                 self.answer["comment"] = "Поля заполнены не правильно"
-                self.driver.quit()
                 return
         except:
             pass
-
 
         if "profile_picture_href" in self.settings:
             self.profile_picture = f"profile_picture_{self.settings['id_scenarios']}.jpg"
@@ -83,7 +81,6 @@ class Create_fan_page_tr(Base_tr):
             out = open(self.profile_picture, "wb")
             out.write(p.content)
             out.close()
-
 
             xpath = "//input[@name='admin_to_do_profile_pic']"
             if self.find_xpath(xpath):
@@ -137,7 +134,6 @@ class Create_fan_page_tr(Base_tr):
             else:
                 pass
 
-
             xpath = "(//div[@class='_ohf rfloat'])[last()]"
             if self.find_xpath(xpath, circle=5, time_sleep=1):
                 self.click_to_xpath(xpath)
@@ -149,23 +145,22 @@ class Create_fan_page_tr(Base_tr):
         else:
             xpath = "//a[@class='_42ft _4jy0 _4jy3 _517h _51sy']"
             self.click_to_xpath(xpath, circle=5, time_sleep=1)
+        time.sleep(5)
+        self.driver.refresh()
 
-        step = 0
-        while True:
-            url = self.driver.current_url.replace("www.","")
-            if "modal=admin_todo_tour" in url:
+        url = None
+        for i in range(30):
+            index = self.driver.current_url.find("modal=admin_todo_tour")
+            if index != -1:
+                url = self.driver.current_url
                 break
             else:
-                step+=1
                 time.sleep(1)
-            if step >= 30:
-                break
 
-        self.driver.refresh()
-        self.answer["output_data"]["URL"] = self.driver.current_url.replace("www.","")
+
+        self.answer["output_data"]["URL"] = url
         self.answer["output_data"]["name"] = self.settings["name"]
         self.answer["status"] = "Выполнен"
         self.answer["comment"] = f"FP {self.settings['name']} создана"
-
 
         self.driver.quit()

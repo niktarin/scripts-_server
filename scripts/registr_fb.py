@@ -834,11 +834,8 @@ class Registr_fb_tr(Base_tr):
             self.click_to_xpath(xpath)
 
     def run(self):
-
         self.cover_picture = None
         self.face_picture = None
-
-
         answer = self.connect_to_multilogin()
         if not answer["answer"]:
             self.answer["status"] = "Ошибка"

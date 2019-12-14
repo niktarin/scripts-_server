@@ -12,15 +12,17 @@ class timer(Thread):
     def run(self):
         while True:
             actions = self.actions.copy()
-            for int_time in actions:
-                if int_time < time.time():
-                    action = actions[int_time][0]
+            for float_time in actions:
+                if float_time < time.time():
+                    action = actions[float_time][0]
                     try:
-                        action()
+                        action(actions[float_time][1])
                     except:
                         pass
-                    del self.actions[int_time]
+                    del self.actions[float_time]
             time.sleep(10)
 
     def add_action(self, time, command, commands):
+
         self.actions[time] = [command,commands]
+        print(self.actions)

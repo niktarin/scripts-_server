@@ -182,48 +182,6 @@ class Updata_fb_tr(Base_tr):
         self.scroll_page_up(down, appointment="Скролл вверх")
         return True
 
-    def likes(self):
-        xpath = "//span[@class='_2md']"
-        if not self.click_to_xpath(xpath, appointment="переход на личную страницу"):
-            if self.accaunt_block_flag:
-                self.answer["status"] = "Ошибка"
-            else:
-                self.answer["status"] = "Ошибка сервера"
-            self.answer["comment"] = self.error_comment
-            return False
-
-        self.scroll_page_down(100)
-
-        xpath = "//span[@class='_1mto']/div[@class='_khz _4sz1 _4rw5 _3wv2']/a"
-        elements_1 = self.driver.find_elements_by_xpath(xpath)
-
-        xpath = "//div[@data-testid='UFI2ReactionLink/actionLink']/div/a"
-        elements_2 = self.driver.find_elements_by_xpath(xpath)
-
-        lenght_1 = len(elements_1)
-        lenght_2 = len(elements_2)
-
-        elements = elements_1 if lenght_1 >= lenght_2 else elements_2
-        lenght = lenght_1 if lenght_1 >= lenght_2 else lenght_2
-
-        maximum = int(self.settings["likes_max"])
-        minimum = int(self.settings["likes_min"])
-
-        maximum = maximum if maximum < lenght else lenght
-        minimum = minimum if minimum < lenght else lenght
-
-        if maximum < minimum:
-            minimum, maximum = maximum, minimum
-
-        likes = random.randint(minimum, maximum)
-        likes = likes if likes < len(elements) else len(elements)
-        random.shuffle(elements)
-
-        for index in range(likes):
-            element = elements[index]
-            self.click_to_element(element)
-        return True
-
     def set_reposts(self):
 
         xpath = "//span[@class='_2md']"

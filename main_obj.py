@@ -11,8 +11,10 @@ from scripts.add_friends import Add_friends_tr
 from scripts_v2.updata_fb import Updata_fb_tr
 # from scripts_v2.check_fb import Check_fb
 # from scripts_v2.сreate_fan_page import Create_fan_page_tr
-from scripts_v2.registr_fb import Registr_fb_tr
-
+from scripts_v3_normal_comp.registr_fb import Registr_fb_tr
+from scripts_v2.first_ad_card_BM import First_ad_card_BM
+from scripts_v2.likes import Likes
+from scripts_v2.likes_vity import Likes_vity
 
 # from scripts_v2.load_img import load_img_tr
 
@@ -150,11 +152,14 @@ class main_obj:
         elif type_scenario == "fb_registration":
             tread = Registr_fb_tr(scenario, self.log)
         #
-        # elif type_scenario == "fb_photo_update":
-        #     tread = load_img_tr(scenario)
+        elif type_scenario == "First_ad_card_BM":
+            tread = First_ad_card_BM(scenario, self.log)
 
         elif type_scenario == "fb_surfing":
-            tread = Updata_fb_tr(scenario, self.log)
+            tread = Likes(scenario, self.log)
+
+        elif type_scenario == "fb_likes":
+            tread = Likes_vity(scenario, self.log)
         else:
             self.add_scenario_comment = "Не удалось определить сценарий"
             return False

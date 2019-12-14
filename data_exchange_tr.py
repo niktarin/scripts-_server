@@ -3,6 +3,11 @@ import time
 import requests
 from main_obj import main_obj
 
+arr_errors =["Не удалось запустить аккаунт (настройки пустые)",
+             "Ошибка мультилогина (возможноон не запущен или работает не правильно)",
+             "Не удалось запустить аккаунт в Мультилогине причина не известна",
+             "Ошибка мультиллогина при попытки запустить браузер"]
+
 class data_exchange_tr(Thread):
 
     def __init__(self, main_hab):
@@ -18,30 +23,39 @@ class data_exchange_tr(Thread):
         for my_object in self.main_hab.main_objects:
             if my_object.status == "compleat":
                 answer = my_object.get_answer()
-                if answer["status"] == "Ошибка сервера":
-                    self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
-                    my_object.driver_close()
-                    my_object.status = "del"
 
                 if answer["status"] == "Ошибка":
-                    self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
-                    my_object.driver_close()
-                    my_object.status = "del"
 
-                # else:
+                    if answer["comment"] in arr_errors:
+                        self.main_hab.errors += 1
+                        if self.main_hab.errors >= self.main_hab.max_err:
+                            self.main_hab.max_tread = 0
+                            self.main_hab.errors = 0
+                            t = 3600
+                            self.main_hab.timer.add_action(time=t, command=self.main_hab.console.check_command,
+                                                  commands="command:treads max:2")
+                            print("---------------------------- СЕРВЕР ОСТАНОВЛЕН --------------------------------")
+                            answer["comment"] += "\n(сервер остановлен)"
+
+                    else:
+                        if self.main_hab.errors > 0:
+                            self.main_hab.errors -= 1
+
                 try:
-                    respons = requests.post('http://arbcapsule.club/api/scenarios/script-result', json=answer)
+                    respons = requests.post('http://45.32.237.43/club/api/scenarios/script-result', json=answer)
                     code = respons.status_code
-                    # code = 200
                     self.log.log_append({"name": "server", "action": "return_answer", "text": answer})
-                    self.log.log_append({"name": "server", "action": "respons_code", "text": code})
 
                 except:
                     self.log.log_append({"name": "server", "action": "return_answer", "text": "Не удалось вернуть ответ на сервер"})
                     continue
+                try:
+                    serv_requests = respons.json()
+                except:
+                    self.log.log_append({"name": "server", "action": "get_scenaroi_prod", "text": "Ошибка ответа от сервера"})
+                    continue
 
                 if code == 200:
-                    serv_requests = respons.json()
 
                     if "message" in serv_requests:
                         my_object.driver_close()
@@ -61,7 +75,7 @@ class data_exchange_tr(Thread):
 
     def get_scenaroi(self):
         try:
-            answer = requests.get('http://arbcapsule.club/api/scenarios/get-one')
+            answer = requests.get('http://45.32.237.43/club/api/scenarios/get-one?priority=2')
         except:
             self.log.log_append({"name":"server", "action":"get_scenaroi", "text": "Ошибка при обращении к серверу"})
             return False
@@ -96,6 +110,8 @@ class data_exchange_tr(Thread):
 
     def run(self):
         while self.flag_work:
+
+
             self.check_status_treads()
             self.set_answer()
             self.del_obj()

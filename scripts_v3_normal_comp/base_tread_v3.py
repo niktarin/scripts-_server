@@ -25,8 +25,6 @@ class Base_tr(Thread):
         self.answer = {"output_data": {},
                        "comment": "",
                        "status": "", }
-    def stop(self):
-        self.flag_work = False
 
     def change_language(self, language="English (UK)"):
 
@@ -209,15 +207,15 @@ class Base_tr(Thread):
                 self.error_comment = comment
                 return False
 
-    def window_handles_go(self, handles, action="handles_go", appointment=None):
+    def window_handles_go(self, handles = 1, action="handles_go", appointment=None):
         lenght = len(self.driver.window_handles)
         url = self.driver.current_url
-        if handles >= lenght:
+        if (handles-1) >= lenght:
             self.log.log_append({"name": self.tech_name, "action": action, "text":
                 f"{appointment}/ переход в вкладку {handles}  количесство вкладок {lenght} текущая ссылка {url}"})
             return False
         try:
-            window = self.driver.window_handles[1]
+            window = self.driver.window_handles[handles]
             self.driver.switch_to.window(window)
             new_href = self.driver.current_url
             self.log.log_append({"name": self.tech_name, "action": action,

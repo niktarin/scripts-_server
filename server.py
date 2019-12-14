@@ -7,7 +7,9 @@ from ml_control_obj import ml_control
 
 class main_hab():
     main_objects = []
-    max_tread = 1
+    max_tread = 0
+    max_err = 3
+    errors = 0
 
     def __init__(self):
         self.log = log()
@@ -20,20 +22,12 @@ class main_hab():
         self.console.start()
         self.timer.start()
         self.data_exchange.start()
-        # t = time.time()+100
-        # t = time.time() + 3
-        # print(time.time())
-        # print(t)
-        # print(t+100)
-        # self.timer.add_action(time=t,command = self.console.check_command, commands = "command:treads max:0")
-        # self.timer.add_action(time=t+20,command = self.ml_control.restart_ml)
-        # self.timer.add_action(time=t+30,command = self.ml_control.close_ml)
+        t = 3600
+        self.timer.add_action(time=t,command = self.console.check_command, commands = "command:treads max:2")
 
-# def start():
-#     main_hab = main_hab()
-#     main_hab.start()
 
 main_hab = main_hab()
 main_hab.start()
 
 # command:print_log
+# command:treads max:2

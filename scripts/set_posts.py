@@ -46,9 +46,11 @@ class Set_posts_tr(Base_tr):
     	
         xpath = "//div[@aria-label='Create a post'] "
         if not self.click_to_xpath(xpath, circle=60, time_sleep=1):
-            self.answer["comment"] = f"Время исчерпано не удалось найти {xpath}"
-            self.answer["status"] = "Ошибка"
-            return (False)
+            xpath = "//div[@id='PageComposerPagelet_']"
+            if not self.click_to_xpath(xpath, circle=60, time_sleep=1):
+                self.answer["comment"] = f"Не удалось найти элемент для постинга"
+                self.answer["status"] = "Ошибка"
+                return (False)
 
 
         circle = 0
@@ -68,7 +70,6 @@ class Set_posts_tr(Base_tr):
             else:
                 break
 
-
         try:
 
             if self.text != None:
@@ -77,7 +78,6 @@ class Set_posts_tr(Base_tr):
                     webdriver.ActionChains(self.driver).send_keys(data).perform()
                 webdriver.ActionChains(self.driver).send_keys(Keys.ENTER).perform()
 
-
             if self.link != None:
                 link = self.link.replace("\n", "")
                 if link.replace(" ","") != "":
@@ -85,8 +85,6 @@ class Set_posts_tr(Base_tr):
                     webdriver.ActionChains(self.driver).send_keys(Keys.ENTER).perform()
                     for i in range(len(link)+1):
                         webdriver.ActionChains(self.driver).send_keys(Keys.BACK_SPACE).perform()
-
-
 
             time.sleep(3)
             if self.img_name != None:

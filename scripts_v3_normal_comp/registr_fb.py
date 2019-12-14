@@ -3,7 +3,7 @@ import random
 import time
 import os
 from selenium.webdriver.common.action_chains import ActionChains
-from .base_tread_v2 import Base_tr
+from .base_tread_v3 import Base_tr
 
 
 class Registr_fb_tr(Base_tr):
@@ -200,64 +200,54 @@ class Registr_fb_tr(Base_tr):
     def form_filling(self):
 
         xpath = "//a[@class='_42ft _4jy0 _6lti _4jy6 _4jy2 selected _51sy']"
-        if not self.click_to_xpath(xpath, time_wait=5, appointment="кнопка вызова меню регистрации"):
+        if not self.click_to_xpath(xpath, time_wait=3, appointment="кнопка вызова меню регистрации"):
             self.error_comment = None
 
         xpath = "//input[@name='firstname']"
-        if not self.set_text(xpath, self.f_name, appointment="заполнение поля 'имя'"):
+        if not self.set_text(xpath, self.f_name, appointment="заполнение поля 'имя'", delay=0.2):
             if self.accaunt_block_flag:
                 self.answer["status"] = "Ошибка"
             else:
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         xpath = "//input[@name='lastname']"
-        if not self.set_text(xpath, self.l_name, appointment="заполнение поля 'фамилия'"):
+        if not self.set_text(xpath, self.l_name, appointment="заполнение поля 'фамилия'", delay=0.2):
             if self.accaunt_block_flag:
                 self.answer["status"] = "Ошибка"
             else:
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         xpath = "//input[@name='reg_email__']"
-        if not self.set_text(xpath, self.settings["email_f"], appointment="заполнение поля 'email'"):
+        if not self.set_text(xpath, self.settings["email_f"], appointment="заполнение поля 'email'", delay=0.2):
             if self.accaunt_block_flag:
                 self.answer["status"] = "Ошибка"
             else:
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         xpath = "//input[@name='reg_email_confirmation__']"
-        if not self.set_text(xpath, self.settings["email_f"], appointment="заполнение поля 'email подтвердить'"):
+        if not self.set_text(xpath, self.settings["email_f"], appointment="заполнение поля 'email подтвердить'", delay=0.2):
             if self.accaunt_block_flag:
                 self.answer["status"] = "Ошибка"
             else:
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         xpath = "//input[@name='reg_passwd__']"
-        if not self.set_text(xpath, self.settings["fb_password"], appointment="заполнение поля 'пароль'"):
+        if not self.set_text(xpath, self.settings["fb_password"], appointment="заполнение поля 'пароль'", delay=0.2):
             if self.accaunt_block_flag:
                 self.answer["status"] = "Ошибка"
             else:
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         index = random.randint(2, 27)
         xpath = "//select[@name='birthday_day']"
         if not self.set_current_index(xpath, index, appointment="выбор дня рождения"):
@@ -267,9 +257,7 @@ class Registr_fb_tr(Base_tr):
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         index = random.randint(1, 10)
         xpath = "//select[@name='birthday_month']"
         if not self.set_current_index(xpath, index, appointment="выбор месяца рождения"):
@@ -279,9 +267,7 @@ class Registr_fb_tr(Base_tr):
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         index = random.randint(20, 30)
         xpath = "//select[@name='birthday_year']"
         if not self.set_current_index(xpath, index, appointment="выбор года рождения"):
@@ -291,9 +277,7 @@ class Registr_fb_tr(Base_tr):
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         index = 0
         xpath = "//input[@name='sex']"
         if not self.selected_chec_boxs(xpath, index, appointment="выбор пола"):
@@ -303,9 +287,7 @@ class Registr_fb_tr(Base_tr):
                 self.answer["status"] = "Ошибка сервера"
             self.answer["comment"] = self.error_comment
             return False
-
-        time.sleep(3)
-
+        time.sleep(2)
         xpath = "//button[@name='websubmit']"
         if not self.click_to_xpath(xpath, appointment="кнопка отправки"):
             if self.accaunt_block_flag:
@@ -315,7 +297,7 @@ class Registr_fb_tr(Base_tr):
             self.answer["comment"] = self.error_comment
             return False
 
-        time.sleep(7)
+        time.sleep(5)
         xpath = "//div[@id='reg_error_inner']"
         element = self.return_el_by_xpath(xpath)
         if element != None:
@@ -328,8 +310,8 @@ class Registr_fb_tr(Base_tr):
 
     def load_face(self):
         self.get_link("https://www.facebook.com/profile.php")
-        self.click_esc()
-        self.scroll_page_up(10)
+        self.click_esc(circle=2)
+        self.scroll_page_up(10, time_sleep=0)
 
         if "face_picture_href" in self.settings:
 
@@ -370,8 +352,8 @@ class Registr_fb_tr(Base_tr):
 
     def load_caver(self):
         self.get_link("https://www.facebook.com/profile.php")
-        self.click_esc()
-        self.scroll_page_up(10)
+        self.click_esc(circle=2)
+        self.scroll_page_up(10, time_sleep=0)
         if "cover_picture_href" in self.settings:
 
             href = self.settings["cover_picture_href"]
@@ -410,7 +392,7 @@ class Registr_fb_tr(Base_tr):
         else:
             return False
 
-    def login_mail(self):
+    def login_mail(self, flag=True):
         type_mail = self.settings["email_f"].split("@")[1]
 
         if type_mail == "yahoo.com":
@@ -441,7 +423,7 @@ class Registr_fb_tr(Base_tr):
                 return False
             else:
                 self.enter_click(xpath)
-            time.sleep(5)
+            time.sleep(2)
             self.driver.get("https://mail.yahoo.com")
             text = "mail.yahoo.com/d/folders/1"
             if not self.check_text_in_link(text=text):
@@ -476,7 +458,7 @@ class Registr_fb_tr(Base_tr):
                         return False
                     else:
                         self.enter_click(xpath)
-                time.sleep(3)
+                time.sleep(2)
 
                 xpath = "//input[@id='identifierId']"
                 if not self.set_text(xpath, self.settings["email_f"], time_wait=150,
@@ -489,7 +471,8 @@ class Registr_fb_tr(Base_tr):
                     return False
                 else:
                     self.enter_click(xpath)
-                time.sleep(3)
+
+                time.sleep(2)
                 xpath = "//input[@name='password']"
                 if not self.set_text(xpath, self.settings["email_password"], time_wait=150,
                                      appointment="заполнение поля 'password' входа в почту"):
@@ -502,11 +485,17 @@ class Registr_fb_tr(Base_tr):
                 else:
                     self.enter_click(xpath)
 
-            time.sleep(3)
+            time.sleep(2)
+
+            if self.find_xpath("""//span[text()="Couldn't sign you in"]""") and flag:
+                xpath = "//li[last()-1]"
+                self.click_to_xpath(xpath, time_wait=5)
+                time.sleep(10)
+                self.login_mail(flag = False)
 
             xpath = "//li[last()-1]"
             if self.click_to_xpath(xpath, time_wait=5, appointment="кнопка подверждение рекавери почты"):
-                time.sleep(3)
+                time.sleep(2)
                 xpath = "//input[@id='knowledge-preregistered-email-response']"
                 if not self.set_text(xpath, self.settings["email_s"], appointment="введение рекавери почты"):
                     if self.accaunt_block_flag:
@@ -518,15 +507,19 @@ class Registr_fb_tr(Base_tr):
                 else:
                     self.enter_click(xpath)
 
-            self.window_handles_go(0)
+            xpath = "(//span[@class='RveJvd snByac']/../..)[2]"
+            self.click_to_xpath(xpath,time_wait=5)
 
-            time.sleep(3)
+
+            time.sleep(2)
             text = "myaccount.google.com/signinoptions/recovery-options-collection"
-            if self.check_text_in_link(text=text, circle=7):
+            if self.check_text_in_link(text=text, circle=5):
                 xpath = "//span[text()='Done']"
-                self.click_to_xpath(xpath)
+                if not self.click_to_xpath(xpath):
+                    xpath = "//span[text()='Confirm']"
+                    self.click_to_xpath(xpath)
 
-            time.sleep(3)
+            time.sleep(2)
             text = "accounts.google.com/signin/newfeatures"
             if self.check_text_in_link(text=text):
                 url = "accounts.google.com/signin/newfeatures"
@@ -539,7 +532,17 @@ class Registr_fb_tr(Base_tr):
                     xpath = "//div[@class='U26fgb O0WRkf zZhnYe e3Duub C0oVfc WVqvne ioikHf TMcGbb']"
                     self.click_to_xpath(xpath)
 
-            time.sleep(3)
+            time.sleep(2)
+
+
+
+            # text = "policies.google.com"
+            # if self.check_text_in_link(text=text) and flag:
+            #     self.login_mail(flag=False)
+
+            time.sleep(2)
+
+            self.click_to_xpath(xpath="(//a[@class='gb4'])[1]",time_wait=3)
 
             if not self.driver.current_url in u:
                 return False
@@ -591,6 +594,9 @@ class Registr_fb_tr(Base_tr):
             if self.click_to_xpath(xpath, appointment="поиск песьма"):
                 xpath = "//span[@style='font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;white-space:nowrap;font-weight:bold;vertical-align:middle;color:#ffffff;font-size:14px;line-height:14px']"
                 if self.click_to_xpath(xpath, appointment="клик по ссылке"):
+                    self.window_handles_go(handles=1)
+
+                    time.sleep(3)
                     return True
                 else:
                     return False
@@ -719,7 +725,7 @@ class Registr_fb_tr(Base_tr):
         for i in range(5):
             self.click_esc()
 
-            self.scroll_page_up(10)
+            self.scroll_page_up(10, time_sleep=0)
             xpath = "((//div[@id='profile_timeline_info_review']/li/div/div/div/div)[2]/div)[1]"
             try:
                 element = self.driver.find_element_by_xpath(xpath)
@@ -736,11 +742,10 @@ class Registr_fb_tr(Base_tr):
             question = question.lower()
 
             if question not in ans:
-                print(f"Не определено {question}")
-
+                self.log.log_append(
+                    {"name":"question", "action": "load_file", "text": f"Не определено {question}"})
                 xpath = "//button[@value='deny']"
                 self.click_to_xpath(xpath)
-
 
             else:
                 self.click_esc()
@@ -749,7 +754,7 @@ class Registr_fb_tr(Base_tr):
                 my_answer = answears[0]
 
                 xpath = "//input[@data-testid='searchable-text-input']"
-                self.set_text(xpath, my_answer)
+                self.set_text(xpath, my_answer,delay=0)
 
                 xpath = "//li[@data-testid='choose_contact_button']"
                 self.click_to_xpath(xpath)
@@ -761,12 +766,7 @@ class Registr_fb_tr(Base_tr):
                 self.click_to_xpath(xpath)
 
     def add_groups(self):
-        # time.sleep(10)
-        # self.window_handles_go(1)
-        time.sleep(5)
-        # self.driver.refresh()
-        # self.get_link("")
-
+        time.sleep(2)
         if self.country == "RU":
             file_groups = ".\\data\\RU group.txt"
 
@@ -794,11 +794,9 @@ class Registr_fb_tr(Base_tr):
         for i in range(2):
             link = links[i]
             self.driver.get(link)
-            time.sleep(5)
             self.click_esc()
             xpath = "//button[@data-testid='page_profile_like_button_test_id']"
             self.click_to_xpath(xpath)
-
 
     def run(self):
         try:
@@ -836,9 +834,16 @@ class Registr_fb_tr(Base_tr):
                     {"name": self.tech_name, "action": "check", "text": "аккаун не залогинен/зарегистрированн"})
                 if not self.form_filling():
                     return
+
             self.click_esc()
             xpath = "//*[@id='bluebar_profile_and_home']/div/div/a"
             if not self.click_to_xpath(xpath, time_wait=10):
+                flag, ans = self.check_block()
+                if not flag:
+                    self.answer["status"] = "Ошибка"
+                    self.answer["comment"] = ans
+                    return
+
                 if self.confirm_email():
                     confirm_email_flag = True
                     email_comment = "почта подтверждена"
@@ -867,8 +872,12 @@ class Registr_fb_tr(Base_tr):
             else:
                 self.add_groups()
 
-            self.answer["status"] = "Выполнен"
-            self.answer["comment"] = f"Аккаунт зарегистрирован в фб {email_comment, face_picture, cover_picture}"
+            if not self.accaunt_block_flag:
+                self.answer["status"] = "Выполнен"
+                self.answer["comment"] = f"Аккаунт зарегистрирован в фб {email_comment, face_picture, cover_picture}"
+            else:
+                self.answer["comment"] = self.error_comment
+                self.answer["status"] = "Ошибка"
         except:
             self.log.log_append(
                 {"name": self.tech_name, "action": "error", "text": "Не предвиденная ошибка потока сценария"})
